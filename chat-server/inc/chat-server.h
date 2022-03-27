@@ -1,7 +1,12 @@
+#define MAX_CLIENTS 10
+
+typedef struct client
+{
+    int ip;
+    const char* name;
+} client;
+
 typedef struct masterList
 {
-    int x;
-    int y;
+    client clients[MAX_CLIENTS];
 } masterList;
-
-#define MAX_CLIENTS 10
