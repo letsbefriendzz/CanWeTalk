@@ -10,6 +10,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#define NAME "CLIENT"
+
 int main(int argc, char* argv[])
 {
     int                 my_server_socket, len, done;
@@ -21,7 +23,7 @@ int main(int argc, char* argv[])
 
     if(argc != 3)
     {
-        printf("bad args\n");
+        logger(NAME, "bad args");
         return -1;
     }
     else
@@ -32,7 +34,7 @@ int main(int argc, char* argv[])
 
     if ((host = gethostbyname (ip)) == NULL) 
     {
-        printf ("[CLIENT] : Host Info Search - FAILED\n");
+        logger (NAME, "[CLIENT] : Host Info Search - FAILED");
         return 2;
     }
 
@@ -44,22 +46,22 @@ int main(int argc, char* argv[])
     /*
     * get a socket for communications
     */
-    printf ("[CLIENT] : Getting STREAM Socket to talk to SERVER\n");
+    logger (NAME, "Getting STREAM Socket to talk to SERVER");
     fflush(stdout);
     if ((my_server_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0) 
     {
-        printf ("[CLIENT] : Getting Client Socket - FAILED\n");
+        logger (NAME, "Getting Client Socket - FAILED");
         return 3;
     }
 
     /*
     * attempt a connection to server
     */
-    printf ("[CLIENT] : Connecting to SERVER\n");
+    logger (NAME, "Connecting to SERVER");
     fflush(stdout);
     if (connect (my_server_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0) 
     {
-        printf ("[CLIENT] : Connect to Server - FAILED\n");
+        logger (NAME, "Connect to Server - FAILED");
         close (my_server_socket);
         return 4;
     }
