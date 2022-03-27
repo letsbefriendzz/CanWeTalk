@@ -59,7 +59,7 @@ int main()
     logger ("listen() successful\n");
 
     int i = 0;
-    while(i == 0)
+    do
     {
         // flush the toilet
         fflush(stdout);
@@ -76,7 +76,7 @@ int main()
         fflush(stdout);	
 
         i++; // only here to enforce a single packet received
-    }
+    } while(i == 0);
 
     close(server_sock);
 

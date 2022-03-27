@@ -16,4 +16,6 @@ typedef struct masterList
 
 void logger(const char*);
 
+void* handleClient(void* clientSocket);
+
 #endif
