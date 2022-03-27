@@ -73,7 +73,7 @@ int main()
         printf("%d\n", i);
         fflush(stdout);	
 
-        logger (NAME, "received a packet from CLIENT");
+        logger (NAME, "received a packet from NEW CLIENT");
     } while(i < 10);
 
     close(server_sock);
