@@ -19,7 +19,6 @@ int main()
 {
     int                 server_sock, client_sock, client_len;
     struct sockaddr_in  client_addr, server_addr;
-    memset((void*)ml, 0, sizeof(masterList));
 
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
