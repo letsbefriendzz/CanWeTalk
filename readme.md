@@ -34,6 +34,8 @@ project.
 
 - [ ] The client UI needs to incorporate the ***ncurses*** library.
 
+<img src="_readme-docs/chat-server-flowchart.png"/>
+
 ## Message Format
 
 ### Required Information
