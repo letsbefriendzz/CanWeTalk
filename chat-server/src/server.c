@@ -15,11 +15,6 @@
 volatile masterList* ml;
 volatile int client_num      = 0;
 
-void logger(const char* l)
-{
-    printf("[SERVER] : %s\n", l);
-}
-
 int main()
 {
     int                 server_sock, client_sock, client_len;
