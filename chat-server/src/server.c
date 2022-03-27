@@ -28,9 +28,7 @@ int main()
         return -1;
     }
     else
-    {
         logger(NAME, "Created socket");
-    }
 
     // init server_addr to empty
     memset (&server_addr, 0, sizeof (server_addr));
@@ -45,7 +43,7 @@ int main()
         // log a fail
         logger (NAME, "bind() call in server failed");
         close (server_sock);
-        return 2;
+        return -2;
     } // log a success
     logger (NAME, "bind() call in server succesful");
 
@@ -55,7 +53,7 @@ int main()
         // log a fail
         logger (NAME, "listen() call in server failed");
         close (server_sock);
-        return 3;
+        return -3;
     }// log a success
     logger (NAME, "listen() call in server successful");
 
@@ -72,12 +70,11 @@ int main()
             fflush(stdout);	
             return 4;
         }
-
-        logger (NAME, "received a packet from CLIENT");
+        printf("%d\n", i);
         fflush(stdout);	
 
-        i++; // only here to enforce a single packet received
-    } while(i == 0);
+        logger (NAME, "received a packet from CLIENT");
+    } while(i < 10);
 
     close(server_sock);
 

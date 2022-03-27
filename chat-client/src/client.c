@@ -10,7 +10,11 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <time.h>
+
 #define NAME "CLIENT"
+
+char buffer[BUFSIZ];
 
 int main(int argc, char* argv[])
 {
@@ -64,5 +68,37 @@ int main(int argc, char* argv[])
         logger (NAME, "Connect to Server - FAILED");
         close (my_server_socket);
         return 4;
+    }
+
+    done = 1;
+    while(done)
+    {
+        /* clear out the contents of buffer (if any) */
+        memset(buffer,0,BUFSIZ);
+
+        /*
+        * now that we have a connection, get a commandline from
+        * the user, and fire it off to the server
+        */
+        printf ("[%s] >>> ", userName);
+        fflush (stdout);
+        fgets (buffer, sizeof (buffer), stdin);
+
+        if (buffer[strlen (buffer) - 1] == '\n')
+            buffer[strlen (buffer) - 1] = '\0';
+
+        /* check if the user wants to quit */
+        if(strcmp(buffer,"quit") == 0)
+        {
+            // send the command to the SERVER
+            write (my_server_socket, buffer, strlen (buffer));
+            done = 0;
+        }
+        else
+        {
+            write (my_server_socket, buffer, strlen (buffer));
+            len = read (my_server_socket, buffer, sizeof (buffer));
+            printf ("Result of command:\n%s\n\n", buffer);
+        }
     }
 }
