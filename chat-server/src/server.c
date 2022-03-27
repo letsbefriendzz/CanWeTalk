@@ -16,13 +16,19 @@
 
 #define NAME "SERVER"
 
-volatile masterList* ml;
-volatile int client_num      = 0;
+volatile masterList ml;
+volatile int activeThreads = 0;
+
+void cleanup(int server_sock)
+{
+    close(server_sock);
+}
 
 int main()
 {
     int                 server_sock, client_sock, client_len;
     struct sockaddr_in  client_addr, server_addr;
+    pthread_t           threads[MAX_CLIENTS];
 
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -44,7 +50,7 @@ int main()
     {
         // log a fail
         logger (NAME, "bind() call in server failed");
-        close (server_sock);
+        cleanup(server_sock);
         return -2;
     } // log a success
     logger (NAME, "bind() call in server succesful");
@@ -54,7 +60,7 @@ int main()
     {
         // log a fail
         logger (NAME, "listen() call in server failed");
-        close (server_sock);
+        cleanup(server_sock);
         return -3;
     }// log a success
     logger (NAME, "listen() call in server successful");
@@ -70,15 +76,22 @@ int main()
         {
             logger(NAME, "accept() call in server failed");
             fflush(stdout);	
-            return 4;
+            return -4;
         }
-        printf("%d\n", i);
-        fflush(stdout);	
 
         logger (NAME, "received a packet from NEW CLIENT");
-    } while(i < 10);
 
-    close(server_sock);
+        if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&client_sock))
+        {
+            logger (NAME, "pthread_create() FAILED\n");
+            fflush(stdout);
+            return 5;
+        }
+        fflush(stdout);	
+        activeThreads++;
+    } while( activeThreads > 0 );
+
+    cleanup(server_sock);
 
     return 0;
 }

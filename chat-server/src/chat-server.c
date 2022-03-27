@@ -11,7 +11,7 @@ void* handleClient(void* clientSocket)
     {
         int numBytesRead = read (client_sock, buffer, BUFSIZ);
         /* we're actually not going to execute the command - but we could if we wanted */
-        sprintf (message, "[SERVER (Thread-%02d)] : Received %d bytes - command - %s\n", 0, numBytesRead, buffer);
+        sprintf (message, "[SERVER (Thread-%02d)] : Received %d bytes - command - %s\n", client_sock, numBytesRead, buffer);
         write (client_sock, message, strlen(message)); 
 
         // clear out and get the next command and process
@@ -19,4 +19,5 @@ void* handleClient(void* clientSocket)
     } while( strcmp(message, "<<bye>>") != 0 );
 
     close(client_sock);
+    return 0;
 }
