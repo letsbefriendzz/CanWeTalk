@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
     }
 
     done = 1;
-    while(done)
+    while(done == 1)
     {
         /* clear out the contents of buffer (if any) */
         memset(buffer,0,BUFSIZ);
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
             buffer[strlen (buffer) - 1] = '\0';
 
         /* check if the user wants to quit */
-        if(strcmp(buffer,"quit") == 0)
+        if(strcmp(buffer,"asdf") == 0)
         {
             // send the command to the SERVER
             write (my_server_socket, buffer, strlen (buffer));
@@ -100,4 +100,7 @@ int main(int argc, char* argv[])
             printf ("Result of command:\n%s\n\n", buffer);
         }
     }
+
+    close(my_server_socket);
+    logger(NAME, "QUITTING...");
 }

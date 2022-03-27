@@ -18,11 +18,8 @@
 
 volatile masterList ml;
 volatile int activeThreads = 0;
-
-void cleanup(int server_sock)
-{
-    close(server_sock);
-}
+void* handleClient(void* clientSocket);
+void cleanup(int server_sock);
 
 int main()
 {
@@ -79,19 +76,54 @@ int main()
             return -4;
         }
 
+        fflush(stdout);
         logger (NAME, "received a packet from NEW CLIENT");
-
+        activeThreads++;
         if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&client_sock))
         {
             logger (NAME, "pthread_create() FAILED\n");
             fflush(stdout);
             return 5;
         }
+        else
+            logger(NAME, "Created new thread");
         fflush(stdout);	
-        activeThreads++;
+        printf("%d\n", activeThreads);
     } while( activeThreads > 0 );
+    printf("%d\n", activeThreads);
 
     cleanup(server_sock);
 
     return 0;
+}
+
+void* handleClient(void* clientSocket)
+{
+    char buffer[BUFSIZ];
+    char message[BUFSIZ];
+    int client_sock = *((int*)clientSocket);
+    do
+    {
+        int numBytesRead = read (client_sock, buffer, BUFSIZ);
+
+        if(strcmp(buffer,"asdf") == 0)
+            break;
+        /* we're actually not going to execute the command - but we could if we wanted */
+        sprintf (message, "COMMAND - %s\n", buffer);
+        write (client_sock, message, strlen(message)); 
+
+        // clear out and get the next command and process
+        memset(buffer,0,BUFSIZ);
+    } while( strcmp(buffer, "asdf") != 0 );
+    
+    write(client_sock, "CLOSING SOCK", strlen("CLOSING SOCK"));
+    close(client_sock);
+    pthread_exit( (void *) (0) );
+    //activeThreads--;
+    return 0;
+}
+
+void cleanup(int server_sock)
+{
+    close(server_sock);
 }
