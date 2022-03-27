@@ -5,4 +5,6 @@
 
 void helloWorld();
 
+void logger(const char* user, const char* msg);
+
 #endif

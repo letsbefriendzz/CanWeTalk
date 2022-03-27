@@ -12,6 +12,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#define NAME "SERVER"
+
 volatile masterList* ml;
 volatile int client_num      = 0;
 
@@ -22,12 +24,12 @@ int main()
 
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        logger("Failed to create socket");
+        logger(NAME, "Failed to create socket");
         return -1;
     }
     else
     {
-        logger("Created socket");
+        logger(NAME, "Created socket");
     }
 
     // init server_addr to empty
@@ -41,21 +43,21 @@ int main()
     if (bind (server_sock, (struct sockaddr *)&server_addr, sizeof (server_addr)) < 0) 
     {
         // log a fail
-        logger ("bind() call in server failed");
+        logger (NAME, "bind() call in server failed");
         close (server_sock);
         return 2;
     } // log a success
-    logger ("bind() call in server succesful");
+    logger (NAME, "bind() call in server succesful");
 
     // attempt to init listener
     if (listen (server_sock, 5) < 0) 
     {
         // log a fail
-        logger ("listen() call in server failed");
+        logger (NAME, "listen() call in server failed");
         close (server_sock);
         return 3;
     }// log a success
-    logger ("listen() call in server successful");
+    logger (NAME, "listen() call in server successful");
 
     int i = 0;
     do
@@ -66,12 +68,12 @@ int main()
         // if accept() returns < 0, an error has occured
         if ( ( client_sock = accept (server_sock,(struct sockaddr *)&client_addr, &client_len ) ) < 0)
         {
-            logger("accept() call in server failed");
+            logger(NAME, "accept() call in server failed");
             fflush(stdout);	
             return 4;
         }
 
-        logger ("received a packet from CLIENT");
+        logger (NAME, "received a packet from CLIENT");
         fflush(stdout);	
 
         i++; // only here to enforce a single packet received
