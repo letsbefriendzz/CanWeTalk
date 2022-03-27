@@ -41,21 +41,21 @@ int main()
     if (bind (server_sock, (struct sockaddr *)&server_addr, sizeof (server_addr)) < 0) 
     {
         // log a fail
-        logger ("bind() FAILED");
+        logger ("bind() call in server failed");
         close (server_sock);
         return 2;
     } // log a success
-    logger ("bind() successful");
+    logger ("bind() call in server succesful");
 
     // attempt to init listener
     if (listen (server_sock, 5) < 0) 
     {
         // log a fail
-        logger ("listen() - FAILED.\n");
+        logger ("listen() call in server failed");
         close (server_sock);
         return 3;
     }// log a success
-    logger ("listen() successful\n");
+    logger ("listen() call in server successful");
 
     int i = 0;
     do
@@ -66,7 +66,7 @@ int main()
         // if accept() returns < 0, an error has occured
         if ( ( client_sock = accept (server_sock,(struct sockaddr *)&client_addr, &client_len ) ) < 0)
         {
-            logger("accept() FAILED");
+            logger("accept() call in server failed");
             fflush(stdout);	
             return 4;
         }

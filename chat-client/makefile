@@ -6,17 +6,17 @@
 # =======================================================
 #
 # FINAL BINARY Target
-./bin/chatClient : ./obj/chatClient.o
-	cc ./obj/chatClient.o -o ./bin/chatClient -lpthread
+./bin/chatClient : ./obj/client.o ./obj/chatClient.o ../common/obj/common.o
+	cc ./obj/client.o ./obj/chatClient.o ../common/obj/common.o -o ./bin/chatClient -lpthread
 #
 # =======================================================
 #                     Dependencies
-# =======================================================                     
+# =======================================================   
+./obj/client.o : ./src/client.c
+	cc -c ./src/client.c -o ./obj/client.o
+
 ./obj/chatClient.o : ./src/chat-client.c
 	cc -c ./src/chat-client.c -o ./obj/chatClient.o
 
-#
-# =======================================================
-# Other targets
-# =======================================================                     
-clean:
+../common/obj/common.o : ../common/src/common.c
+	cc -c ../common/src/common.c -o ../common/obj/common.o

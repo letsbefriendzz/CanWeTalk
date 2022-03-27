@@ -20,9 +20,3 @@
 
 ../common/obj/common.o : ../common/src/common.c
 	cc -c ../common/src/common.c -o ../common/obj/common.o
-
-#
-# =======================================================
-# Other targets
-# =======================================================                     
-clean:
