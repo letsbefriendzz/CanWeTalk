@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include <string.h>
 
+volatile masterList* ml;
+volatile int client_num      = 0;
+
 void logger(const char* l)
 {
     printf("[SERVER] : %s\n", l);
@@ -21,7 +24,7 @@ int main()
 {
     int                 server_sock, client_sock, client_len;
     struct sockaddr_in  client_addr, server_addr;
-    masterList* ml = NULL;
+    memset((void*)ml, 0, sizeof(masterList));
 
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -40,29 +43,34 @@ int main()
     server_addr.sin_addr.s_addr = htonl (INADDR_ANY);
     server_addr.sin_port        = htons (PORT);
 
+    // attempt to bind
     if (bind (server_sock, (struct sockaddr *)&server_addr, sizeof (server_addr)) < 0) 
     {
+        // log a fail
         logger ("bind() FAILED");
         close (server_sock);
         return 2;
-    }
+    } // log a success
     logger ("bind() successful");
 
+    // attempt to init listener
     if (listen (server_sock, 5) < 0) 
     {
+        // log a fail
         logger ("listen() - FAILED.\n");
         close (server_sock);
         return 3;
-    }
+    }// log a success
     logger ("listen() successful\n");
 
-    int i=0;
+    int i = 0;
     while(i == 0)
     {
-        logger("Ready to accept()");
-        fflush(stdout);	
+        // flush the toilet
+        fflush(stdout);
         client_len = sizeof (client_addr);
-        if ((client_sock = accept (server_sock,(struct sockaddr *)&client_addr, &client_len)) < 0) 
+        // if accept() returns < 0, an error has occured
+        if ( ( client_sock = accept (server_sock,(struct sockaddr *)&client_addr, &client_len ) ) < 0)
         {
             logger("accept() FAILED");
             fflush(stdout);	
@@ -72,7 +80,7 @@ int main()
         logger ("received a packet from CLIENT");
         fflush(stdout);	
 
-        i++;
+        i++; // only here to enforce a single packet received
     }
 
     close(server_sock);
