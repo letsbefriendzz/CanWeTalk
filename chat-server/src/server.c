@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 void logger(const char* l)
 {
@@ -18,6 +19,7 @@ int main()
 {
     int                 server_sock, client_sock, client_len;
     struct sockaddr_in  client_addr, server_addr;
+    masterList* ml = NULL;
 
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         logger("Failed to create socket");
