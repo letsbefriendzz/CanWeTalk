@@ -17,6 +17,8 @@ project.
 
 ## The `Chat-Server`
 
+<img src="_readme-docs/chat-server-flowchart.png"/>
+
 - [ ] The server **must be multithreaded**
 
     Each time a new user joins the conversation, a new thread is spawned to listen
@@ -33,8 +35,6 @@ project.
 ## The `Chat-Client`
 
 - [ ] The client UI needs to incorporate the ***ncurses*** library.
-
-<img src="_readme-docs/chat-server-flowchart.png"/>
 
 ## Message Format
 
