@@ -172,7 +172,7 @@ void* handleClient(void* clientSocket)
 
         sprintf (message, "COMMAND - %s\n", buffer);
 
-        if(strcmp(buffer, "asdf") == 0) break;
+        if(strcmp(buffer, ">>bye<<") == 0) break;
 
         broadcastMessage(client_sock, message);
 
