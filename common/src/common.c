@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 void helloWorld()
 {
@@ -35,4 +36,17 @@ int getIndexOf(const char* str, char c, int ins)
     }
 
     return -2;
+}
+
+const char* subString(const char* str, int s, int e)
+{
+    if(( e-s ) < 1 || s < 0 || e > strlen(str))
+        return NULL;
+
+    char* rtrn = malloc(sizeof(char) * ((e-s)+1) );
+    for(int i = s; i < e; i++)
+    {   
+        rtrn[i-s] = str[i];
+    }
+    return rtrn;
 }
