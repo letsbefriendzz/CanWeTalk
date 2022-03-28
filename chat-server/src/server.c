@@ -98,6 +98,7 @@ int main()
         }
 
         displayMasterList();
+        printf("THREADS RUNNING:\t%d\n", activeThreads);
 
     } while( activeThreads > 0 );
     printf("%d\n", activeThreads);
@@ -109,14 +110,17 @@ int main()
 
 void displayMasterList()
 {
-    for(int i = 0; i < activeThreads; i++)
+    for(int i = 0; i < MAX_CLIENTS; i++)
         printf("[%d] - IP:\t%d\n", i, ml.clients[i].ip);
+
+    printf("==============================\n");
 }
 
+/*
+Removes and flattens the masterList given an index to delete.
+*/
 int removeFromMasterList( int index )
 {
-    // if i + 1 == the number of DCs connected, we're just removing the last one
-    // ez pz
     if ( index + 1 == activeThreads )
     {
         ml.clients[index].ip   = 0;
@@ -126,18 +130,22 @@ int removeFromMasterList( int index )
     {
         for(int i = index; i < activeThreads; i++)
         {
-            ml.clients[i].ip = ml.clients[i+1].ip;
-            ml.clients[i].name = ml.clients[i+1].name;
+            ml.clients[i].ip    = ml.clients[i+1].ip;
+            ml.clients[i].name  = ml.clients[i+1].name;
         }
     }
     return 0;
 }
 
+/*
+Sets all values of the global masterList instance to empty values.
+*/
 void initMasterList()
 {
+    logger(NAME, "initMasterList() called");
     for(int i = 0; i < MAX_CLIENTS; i++)
     {
-        ml.clients[i].ip   = 0;
+        ml.clients[i].ip   = -1;
         ml.clients[i].name = NULL;
     }
 }
@@ -161,10 +169,14 @@ void* handleClient(void* clientSocket)
     }
 
     close(client_sock);
-    pthread_exit( (void *) (0) );
-    
+    removeFromMasterList(threadIndex);
     activeThreads--;
-    return 0;
+    pthread_exit( (void *) (0) );
+}
+
+int broadcastMessage(int socket, const char* msg)
+{
+    write(socket, msg, strlen(msg));
 }
 
 void cleanup(int server_sock)
