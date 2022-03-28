@@ -6,6 +6,7 @@
 
 #include <netdb.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -112,7 +113,9 @@ int main()
 void displayMasterList()
 {
     for(int i = 0; i < MAX_CLIENTS; i++)
+    {
         printf("[%d] - IP:\t%d\n", i, ml.clients[i].ip);
+    }
 
     printf("==============================\n");
 }
