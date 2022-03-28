@@ -6,13 +6,15 @@
 #include <pthread.h>
 #include <netdb.h>
 
+static volatile int msgs_recv = 0;
+
 static volatile int exit = 1;
 static WINDOW *msg_win;
 static int i = 0;
 static int shouldBlank = 0;
 
 void* listener_func(void* l);
-int broadcastMessage(int socket, const char* msg);
+int broadcastMessage(int socket, const char* msg, int* counter);
 
 WINDOW *create_newwin(int, int, int, int);
 void destroy_win(WINDOW *);
@@ -28,10 +30,9 @@ void threadWindowTest(const char* msg)
 
 int window_loop(int socket)
 {
+  int msgs_sent = 0;
   pthread_t listener;
-  //pthread_create( &listener, NULL , listener_func, (void *)&socket);
   sleep(1);
-  printf("EXIT:\t%d\n", exit);
   //return -1;
   // so from about here
 
@@ -65,14 +66,17 @@ int window_loop(int socket)
   chat_win = create_newwin(chat_height, chat_width, chat_starty, chat_startx);
   scrollok(chat_win, TRUE);
 
+  pthread_create( &listener, NULL , listener_func, (void *)&socket);
+  listener_func((void*)&socket);
+
   /* allow the user to input 5 messages for display */ 
   while(strcmp( buf, ">>bye<<" ) != 0)
   {
     input_win(chat_win, buf);
-    broadcastMessage(socket, buf);
+    broadcastMessage(socket, buf, &msgs_sent);
     //display_win(msg_win, buf, i, shouldBlank);
     //printf("\n%s\n", buf);
-    threadWindowTest((const char*)buf);
+    //threadWindowTest((const char*)buf);
     i++;
   }
 
@@ -80,12 +84,13 @@ int window_loop(int socket)
   shouldBlank = 1;
   sprintf(buf,"Messaging is complete ... destroying window in 5 seconds");
   display_win(msg_win, buf, 0, shouldBlank);
-  
-  sleep(1);
      
   destroy_win(chat_win);
   destroy_win(msg_win);
   endwin();
+
+  printf("TOTAL MESSAGES RECEIVED:\t%d\n\n", msgs_recv);
+  printf("TOTAL MESSAGES SENT:\t\t%d\n", msgs_sent);
 }
      
 WINDOW *create_newwin(int height, int width, int starty, int startx)
@@ -93,8 +98,8 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
   WINDOW *local_win;
      
   local_win = newwin(height, width, starty, startx);
-  box(local_win, 0, 0);               /* draw a box */
-  wmove(local_win, 1, 1);             /* position cursor at top */
+  box(local_win, 0, 0);   /* draw a box */
+  wmove(local_win, 1, 1); /* position cursor at top */
   wrefresh(local_win);
   return local_win;
 }
@@ -150,12 +155,12 @@ void display_win(WINDOW *win, const char *word, int whichRow, int shouldBlank)
   wprintw(win, word);
   wrefresh(win);
 } /* display_win */
-     
+
 void destroy_win(WINDOW *win)
 {
   delwin(win);
 }  /* destory_win */
-     
+
 void blankWin(WINDOW *win)
 {
   int i;
@@ -169,7 +174,7 @@ void blankWin(WINDOW *win)
     wclrtoeol(win);
     wrefresh(win);
   }
-  box(win, 0, 0);             /* draw the box again */
+  box(win, 0, 0);  /* draw the box again */
   wrefresh(win);
 }  /* blankWin */
 
@@ -185,13 +190,16 @@ void* listener_func(void* s)
 
     if(strcmp(buffer, ">>bye<<") == 0) break;
 
-    display_win(msg_win, buffer, i, 0);
-    i++;
+    if(numBytesRead > 0)
+    {
+      msgs_recv++;
+    }
   }
   pthread_exit((void*) 0);
 }
 
-int broadcastMessage(int socket, const char* msg)
+int broadcastMessage(int socket, const char* msg, int* counter)
 {
-    return write(socket, msg, strlen(msg));
+  (*counter)++;
+  return write(socket, msg, strlen(msg));
 }

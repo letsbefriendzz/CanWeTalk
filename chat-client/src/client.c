@@ -68,9 +68,10 @@ int main(int argc, char* argv[])
         return 4;
     }
 
+/*
     window_loop(my_server_socket);
-
     return -1;
+*/
 
     done = 1;
     while(done == 1)
@@ -80,8 +81,7 @@ int main(int argc, char* argv[])
 
         /*
         * now that we have a connection, get a commandline from
-        * the user, and fire it off to the server
-        */
+        * the user, and fire it off to the server */
         printf ("[%s] >>> ", userName);
         fflush (stdout);
         fgets (buffer, sizeof (buffer), stdin);
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
             buffer[strlen (buffer) - 1] = '\0';
 
         /* check if the user wants to quit */
-        if(strcmp(buffer,"asdf") == 0)
+        if(strcmp(buffer,">>bye<<") == 0)
         {
             // send the command to the SERVER
             write (my_server_socket, buffer, strlen (buffer));
@@ -107,3 +107,39 @@ int main(int argc, char* argv[])
     close(my_server_socket);
     logger(NAME, "QUITTING...");
 }
+
+/*
+    done = 1;
+    while(done == 1)
+    {
+        /* clear out the contents of buffer (if any)
+        memset(buffer,0,BUFSIZ);
+
+        /*
+        * now that we have a connection, get a commandline from
+        * the user, and fire it off to the server
+        printf ("[%s] >>> ", userName);
+        fflush (stdout);
+        fgets (buffer, sizeof (buffer), stdin);
+
+        if (buffer[strlen (buffer) - 1] == '\n')
+            buffer[strlen (buffer) - 1] = '\0';
+
+        /* check if the user wants to quit
+        if(strcmp(buffer,">>bye<<") == 0)
+        {
+            // send the command to the SERVER
+            write (my_server_socket, buffer, strlen (buffer));
+            done = 0;
+        }
+        else
+        {
+            write (my_server_socket, buffer, strlen (buffer));
+            len = read (my_server_socket, buffer, sizeof (buffer));
+            printf ("Result of command:\n%s\n\n", buffer);
+        }
+    }
+
+    close(my_server_socket);
+    logger(NAME, "QUITTING...");
+*/
