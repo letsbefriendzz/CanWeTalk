@@ -24,6 +24,7 @@ void cleanup( int server_sock );
 void displayMasterList();
 int removeFromMasterList( int index );
 void initMasterList();
+int broadcastMessage(int socket, const char* msg);
 
 int main()
 {
@@ -165,7 +166,8 @@ void* handleClient(void* clientSocket)
         int numBytesRead = read (client_sock, buffer, BUFSIZ);
 
         sprintf (message, "COMMAND - %s\n", buffer);
-        write (client_sock, message, strlen(message)); 
+        for(int i = 0; i < activeThreads; i++)
+            broadcastMessage(ml.clients[i].ip, message);
     }
 
     close(client_sock);
