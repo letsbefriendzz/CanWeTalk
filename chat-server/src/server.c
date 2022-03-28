@@ -172,10 +172,14 @@ void* handleClient(void* clientSocket)
 
         sprintf (message, "COMMAND - %s\n", buffer);
 
-        if(strcmp(buffer, "asdf") != 0) break;
+        if(strcmp(buffer, "asdf") == 0) break;
 
+        broadcastMessage(client_sock, message);
+
+        /*
         for(int i = 0; i < activeThreads; i++)
             broadcastMessage(ml.clients[i].ip, message);
+        */
     }
 
     close(client_sock);

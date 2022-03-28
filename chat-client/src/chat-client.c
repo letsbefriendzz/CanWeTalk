@@ -7,7 +7,10 @@
 #include <netdb.h>
 
 static volatile int exit = 1;
+static WINDOW *msg_win;
+
 void* listener_func(void* l);
+int broadcastMessage(int socket, const char* msg);
 
 WINDOW *create_newwin(int, int, int, int);
 void destroy_win(WINDOW *);
@@ -16,12 +19,16 @@ void display_win(WINDOW *, char *, int, int);
 void destroy_win(WINDOW *win);
 void blankWin(WINDOW *win);
      
-int window_loop(int socket, struct sockaddr_in server, struct hostent* host)
+int window_loop(int socket)
 {
   pthread_t listener;
+  pthread_create( &listener, NULL , listener_func, (void *)&socket);
+  sleep(1);
+  printf("EXIT:\t%d\n", exit);
+  //return -1;
   // so from about here
 
-  WINDOW *chat_win, *msg_win;
+  WINDOW *chat_win;
   int chat_startx, chat_starty, chat_width, chat_height;
   int msg_startx, msg_starty, msg_width, msg_height, i;
   int shouldBlank;
@@ -45,8 +52,6 @@ int window_loop(int socket, struct sockaddr_in server, struct hostent* host)
   msg_starty = 0;
 
   // to here, I have no clue what the hell is happening
-
-  pthread_create( &listener, NULL , listener_func, (void *)&server);
   
   /* create the input window */
   msg_win = create_newwin(msg_height, msg_width, msg_starty, msg_startx);
@@ -58,9 +63,12 @@ int window_loop(int socket, struct sockaddr_in server, struct hostent* host)
 
   /* allow the user to input 5 messages for display */ 
   while(strcmp( buf, ">>bye<<" ) != 0)
-  {    
+  {
+    memset(buf,0,BUFSIZ);
+    fflush (stdout);
     input_win(chat_win, buf);
-    display_win(msg_win, buf, i, shouldBlank);
+    broadcastMessage(socket, buf);
+    //display_win(msg_win, buf, i, shouldBlank);
     i++;
   }
   sleep(3); /* to get a delay */
@@ -84,7 +92,7 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
   local_win = newwin(height, width, starty, startx);
   box(local_win, 0, 0);               /* draw a box */
   wmove(local_win, 1, 1);             /* position cursor at top */
-  wrefresh(local_win);     
+  wrefresh(local_win);
   return local_win;
 }
      
@@ -162,8 +170,29 @@ void blankWin(WINDOW *win)
   wrefresh(win);
 }  /* blankWin */
 
-void* listener_func(void* l)
+void* listener_func(void* s)
 {
-  exit = 0;
+  int server_socket = *(int*)s;
+  char buffer[BUFSIZ];
+  char message[BUFSIZ];
+
+  while( 1 )
+  {
+      // clear out and get the next command and process
+      memset(buffer,0,BUFSIZ);
+      int numBytesRead = read (server_socket, buffer, BUFSIZ);
+
+      sprintf (message, "COMMAND - %s\n", buffer);
+
+      if(strcmp(buffer, "asdf") != 0) break;
+
+      display_win(msg_win, buffer, 0, 0);
+  }
+
   pthread_exit((void*) 0);
+}
+
+int broadcastMessage(int socket, const char* msg)
+{
+    return write(socket, msg, strlen(msg));
 }

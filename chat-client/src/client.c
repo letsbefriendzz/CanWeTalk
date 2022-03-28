@@ -68,7 +68,9 @@ int main(int argc, char* argv[])
         return 4;
     }
 
-    window_loop(my_server_socket, server_addr, host);
+    window_loop(my_server_socket);
+
+    return -1;
 
     done = 1;
     while(done == 1)
