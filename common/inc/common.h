@@ -13,5 +13,6 @@ typedef struct message
 void helloWorld();
 void logger(const char* user, const char* msg);
 const char* constructMessage(message* m);
+int occursIn(const char*, char);
 
 #endif
