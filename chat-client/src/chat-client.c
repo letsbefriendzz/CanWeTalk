@@ -3,8 +3,11 @@
 #include <fcntl.h>
 #include <string.h>
 #include <ncurses.h>
-
+#include <pthread.h>
 #include <netdb.h>
+
+static volatile int exit = 1;
+void* listener_func(void* l);
 
 WINDOW *create_newwin(int, int, int, int);
 void destroy_win(WINDOW *);
@@ -15,6 +18,9 @@ void blankWin(WINDOW *win);
      
 int window_loop(int socket, struct sockaddr_in server, struct hostent* host)
 {
+  pthread_t listener;
+  // so from about here
+
   WINDOW *chat_win, *msg_win;
   int chat_startx, chat_starty, chat_width, chat_height;
   int msg_startx, msg_starty, msg_width, msg_height, i;
@@ -26,17 +32,21 @@ int window_loop(int socket, struct sockaddr_in server, struct hostent* host)
   noecho();
   refresh();
   
-  shouldBlank = 0; 
+  shouldBlank = 0;
 
   chat_height = 5;
   chat_width  = COLS - 2;
-  chat_startx = 1;        
-  chat_starty = LINES - chat_height;        
-     
+  chat_startx = 1;
+  chat_starty = LINES - chat_height;
+
   msg_height = LINES - chat_height - 1;
   msg_width  = COLS;
-  msg_startx = 0;        
-  msg_starty = 0;        
+  msg_startx = 0;
+  msg_starty = 0;
+
+  // to here, I have no clue what the hell is happening
+
+  pthread_create( &listener, NULL , listener_func, (void *)&server);
   
   /* create the input window */
   msg_win = create_newwin(msg_height, msg_width, msg_starty, msg_startx);
@@ -78,7 +88,10 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
   return local_win;
 }
      
-/* This function is for taking input chars from the user */
+/*
+This function takes characters from the user and sends them to the word
+pointer that was provided as a parameter.
+*/
 void input_win(WINDOW *win, char *word)
 {
   int i, ch;
@@ -119,8 +132,10 @@ void input_win(WINDOW *win, char *word)
      
 void display_win(WINDOW *win, char *word, int whichRow, int shouldBlank)
 {
-  if(shouldBlank == 1) blankWin(win);                /* make it a clean window */
-  wmove(win, (whichRow+1), 1);                       /* position cusor at approp row */
+  // if shouldBlank flag is set, clear the window
+  if(shouldBlank == 1)
+  blankWin(win);
+  wmove(win, (whichRow+1), 1); // position cusor at approp row
   wprintw(win, word);
   wrefresh(win);
 } /* display_win */
@@ -146,3 +161,9 @@ void blankWin(WINDOW *win)
   box(win, 0, 0);             /* draw the box again */
   wrefresh(win);
 }  /* blankWin */
+
+void* listener_func(void* l)
+{
+  exit = 0;
+  pthread_exit((void*) 0);
+}

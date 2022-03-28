@@ -107,6 +107,8 @@ int main()
 
     cleanup(server_sock);
 
+    printf("meme\n");
+
     return 0;
 }
 
@@ -162,13 +164,16 @@ void* handleClient(void* clientSocket)
     int threadIndex = activeThreads;
     activeThreads++;
 
-    while( strcmp(buffer, "asdf") != 0 )
+    while( 1 )
     {
         // clear out and get the next command and process
         memset(buffer,0,BUFSIZ);
         int numBytesRead = read (client_sock, buffer, BUFSIZ);
 
         sprintf (message, "COMMAND - %s\n", buffer);
+
+        if(strcmp(buffer, "asdf") != 0) break;
+
         for(int i = 0; i < activeThreads; i++)
             broadcastMessage(ml.clients[i].ip, message);
     }
