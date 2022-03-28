@@ -176,10 +176,8 @@ void* handleClient(void* clientSocket)
 
         broadcastMessage(client_sock, message);
 
-        /*
         for(int i = 0; i < activeThreads; i++)
             broadcastMessage(ml.clients[i].ip, message);
-        */
     }
 
     close(client_sock);

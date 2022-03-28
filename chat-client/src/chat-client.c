@@ -8,6 +8,7 @@
 
 static volatile int exit = 1;
 static WINDOW *msg_win;
+static volatile int i = 0;
 
 void* listener_func(void* l);
 int broadcastMessage(int socket, const char* msg);
@@ -18,7 +19,12 @@ void input_win(WINDOW *, char *);
 void display_win(WINDOW *, char *, int, int);
 void destroy_win(WINDOW *win);
 void blankWin(WINDOW *win);
-     
+
+void threadWindowTest(char* msg)
+{
+  display_win(msg_win, msg, i, 0);
+}
+
 int window_loop(int socket)
 {
   pthread_t listener;
@@ -31,15 +37,13 @@ int window_loop(int socket)
   WINDOW *chat_win;
   int chat_startx, chat_starty, chat_width, chat_height;
   int msg_startx, msg_starty, msg_width, msg_height, i;
-  int shouldBlank;
+  int shouldBlank = 0;
   char buf[BUFSIZ];
 
   initscr();                      /* Start curses mode*/
   cbreak();
   noecho();
   refresh();
-  
-  shouldBlank = 0;
 
   chat_height = 5;
   chat_width  = COLS - 2;
@@ -64,11 +68,12 @@ int window_loop(int socket)
   /* allow the user to input 5 messages for display */ 
   while(strcmp( buf, ">>bye<<" ) != 0)
   {
-    memset(buf,0,BUFSIZ);
-    fflush (stdout);
     input_win(chat_win, buf);
     broadcastMessage(socket, buf);
     //display_win(msg_win, buf, i, shouldBlank);
+    //printf("\n%s\n", buf);
+    sleep(1);
+    //threadWindowTest(buf);
     i++;
   }
   sleep(3); /* to get a delay */
@@ -78,7 +83,7 @@ int window_loop(int socket)
   sprintf(buf,"Messaging is complete ... destroying window in 5 seconds");
   display_win(msg_win, buf, 0, shouldBlank);
   
-  sleep(5);                   /* to get a delay */
+  sleep(5); //to get a delay
      
   destroy_win(chat_win);
   destroy_win(msg_win);
@@ -102,7 +107,7 @@ pointer that was provided as a parameter.
 */
 void input_win(WINDOW *win, char *word)
 {
-  int i, ch;
+  int ch;
   int maxrow, maxcol, row = 1, col = 0;
      
   blankWin(win);                          /* make it a clean window */
@@ -174,21 +179,19 @@ void* listener_func(void* s)
 {
   int server_socket = *(int*)s;
   char buffer[BUFSIZ];
-  char message[BUFSIZ];
-
   while( 1 )
   {
+    /*
       // clear out and get the next command and process
       memset(buffer,0,BUFSIZ);
       int numBytesRead = read (server_socket, buffer, BUFSIZ);
 
-      sprintf (message, "COMMAND - %s\n", buffer);
+      if(strcmp(buffer, "asdf") == 0) break;
 
-      if(strcmp(buffer, "asdf") != 0) break;
-
-      display_win(msg_win, buffer, 0, 0);
+      display_win(msg_win, buffer, i, 0);
+      i++;
+    */
   }
-
   pthread_exit((void*) 0);
 }
 
