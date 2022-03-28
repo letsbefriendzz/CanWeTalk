@@ -17,15 +17,21 @@
 #define NAME "SERVER"
 
 volatile masterList ml;
-volatile int activeThreads = 0;
-void* handleClient(void* clientSocket);
-void cleanup(int server_sock);
+static volatile int activeThreads = 0;
+
+void* handleClient( void* clientSocket );
+void cleanup( int server_sock );
+void displayMasterList();
+int removeFromMasterList( int index );
+void initMasterList();
 
 int main()
 {
     int                 server_sock, client_sock, client_len;
     struct sockaddr_in  client_addr, server_addr;
     pthread_t           threads[MAX_CLIENTS];
+
+    initMasterList();
 
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -78,7 +84,6 @@ int main()
 
         fflush(stdout);
         logger (NAME, "received a packet from NEW CLIENT");
-        activeThreads++;
         if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&client_sock))
         {
             logger (NAME, "pthread_create() FAILED\n");
@@ -86,9 +91,14 @@ int main()
             return 5;
         }
         else
+        {
             logger(NAME, "Created new thread");
-        fflush(stdout);	
-        printf("%d\n", activeThreads);
+            ml.clients[activeThreads].ip = client_sock;
+            // activeThreads is iterated within the threads themselves.
+        }
+
+        displayMasterList();
+
     } while( activeThreads > 0 );
     printf("%d\n", activeThreads);
 
@@ -97,29 +107,63 @@ int main()
     return 0;
 }
 
+void displayMasterList()
+{
+    for(int i = 0; i < activeThreads; i++)
+        printf("[%d] - IP:\t%d\n", i, ml.clients[i].ip);
+}
+
+int removeFromMasterList( int index )
+{
+    // if i + 1 == the number of DCs connected, we're just removing the last one
+    // ez pz
+    if ( index + 1 == activeThreads )
+    {
+        ml.clients[index].ip   = 0;
+        ml.clients[index].name = NULL;
+    }
+    else
+    {
+        for(int i = index; i < activeThreads; i++)
+        {
+            ml.clients[i].ip = ml.clients[i+1].ip;
+            ml.clients[i].name = ml.clients[i+1].name;
+        }
+    }
+    return 0;
+}
+
+void initMasterList()
+{
+    for(int i = 0; i < MAX_CLIENTS; i++)
+    {
+        ml.clients[i].ip   = 0;
+        ml.clients[i].name = NULL;
+    }
+}
+
 void* handleClient(void* clientSocket)
 {
     char buffer[BUFSIZ];
     char message[BUFSIZ];
     int client_sock = *((int*)clientSocket);
-    do
+    int threadIndex = activeThreads;
+    activeThreads++;
+
+    while( strcmp(buffer, "asdf") != 0 )
     {
-        int numBytesRead = read (client_sock, buffer, BUFSIZ);
-
-        if(strcmp(buffer,"asdf") == 0)
-            break;
-        /* we're actually not going to execute the command - but we could if we wanted */
-        sprintf (message, "COMMAND - %s\n", buffer);
-        write (client_sock, message, strlen(message)); 
-
         // clear out and get the next command and process
         memset(buffer,0,BUFSIZ);
-    } while( strcmp(buffer, "asdf") != 0 );
-    
-    write(client_sock, "CLOSING SOCK", strlen("CLOSING SOCK"));
+        int numBytesRead = read (client_sock, buffer, BUFSIZ);
+
+        sprintf (message, "COMMAND - %s\n", buffer);
+        write (client_sock, message, strlen(message)); 
+    }
+
     close(client_sock);
     pthread_exit( (void *) (0) );
-    //activeThreads--;
+    
+    activeThreads--;
     return 0;
 }
 

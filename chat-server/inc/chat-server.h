@@ -14,6 +14,4 @@ typedef struct masterList
     client clients[MAX_CLIENTS];
 } masterList;
 
-void* handleClient(void* clientSocket);
-
 #endif
