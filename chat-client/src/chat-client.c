@@ -45,13 +45,22 @@ int window_loop(void)
   scrollok(chat_win, TRUE);
 
   /* allow the user to input 5 messages for display */ 
-  for(i=0; i<5; i++)
+  while(strcmp( buf, "quit" ) != 0)
   {    
     input_win(chat_win, buf);
-    //printf("%s\n", buf);
     display_win(msg_win, buf, i, shouldBlank);
+    i++;
   }
   sleep(3);                   /* to get a delay */
+
+  /*
+  while(strcmp( buf, "quit" ) != 0)
+  {    
+    input_win(chat_win, buf);
+    display_win(msg_win, buf, i, shouldBlank);
+  }
+  sleep(3);     
+  */
 
   /* tell the user that the 5 messages are done ... */
   shouldBlank = 1;
