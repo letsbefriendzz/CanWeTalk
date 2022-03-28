@@ -9,16 +9,20 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <pthread.h>
 
 #define NAME "CLIENT"
 
 char buffer[BUFSIZ];
+
+void* listen_thread(void* s);
 
 int main(int argc, char* argv[])
 {
     int                 my_server_socket, len, done;
     struct sockaddr_in  server_addr;
     struct hostent*     host;
+    pthread_t           listener;
 
     char* userName;
     char* ip;
@@ -73,6 +77,13 @@ int main(int argc, char* argv[])
     return -1;
 */
 
+    if (pthread_create(  &listener, NULL, listen_thread, (void *)&my_server_socket))
+    {
+        logger (NAME, "pthread_create() FAILED\n");
+        fflush(stdout);
+        return 5;
+    }
+
     done = 1;
     while(done == 1)
     {
@@ -82,7 +93,7 @@ int main(int argc, char* argv[])
         /*
         * now that we have a connection, get a commandline from
         * the user, and fire it off to the server */
-        printf ("[%s] >>> ", userName);
+        //printf ("[%s] >>> ", userName);
         fflush (stdout);
         fgets (buffer, sizeof (buffer), stdin);
 
@@ -99,8 +110,6 @@ int main(int argc, char* argv[])
         else
         {
             write (my_server_socket, buffer, strlen (buffer));
-            len = read (my_server_socket, buffer, sizeof (buffer));
-            printf ("Result of command:\n%s\n\n", buffer);
         }
     }
 
@@ -108,38 +117,38 @@ int main(int argc, char* argv[])
     logger(NAME, "QUITTING...");
 }
 
+
+// i become nothing more than a robot when i write code like this
+// i never knew flow until i started programming
 /*
-    done = 1;
-    while(done == 1)
-    {
-        /* clear out the contents of buffer (if any)
-        memset(buffer,0,BUFSIZ);
-
-        /*
-        * now that we have a connection, get a commandline from
-        * the user, and fire it off to the server
-        printf ("[%s] >>> ", userName);
-        fflush (stdout);
-        fgets (buffer, sizeof (buffer), stdin);
-
-        if (buffer[strlen (buffer) - 1] == '\n')
-            buffer[strlen (buffer) - 1] = '\0';
-
-        /* check if the user wants to quit
-        if(strcmp(buffer,">>bye<<") == 0)
-        {
-            // send the command to the SERVER
-            write (my_server_socket, buffer, strlen (buffer));
-            done = 0;
-        }
-        else
-        {
-            write (my_server_socket, buffer, strlen (buffer));
-            len = read (my_server_socket, buffer, sizeof (buffer));
-            printf ("Result of command:\n%s\n\n", buffer);
-        }
-    }
-
-    close(my_server_socket);
-    logger(NAME, "QUITTING...");
+NAME    : listen_thread
+DESC    :
+    The function called by our client thread; responsible for listening for
+    incoming messages from the server and writing them to the screen.
+RTRN    : void*
+PARM    : void*
 */
+void* listen_thread(void* s)
+{
+    int server_socket = *(int*)s;
+    char b[BUFSIZ];
+
+    int lti = 0;
+    while( 1 )
+    {
+        // clear out and get the next command and process
+        memset(b,0,BUFSIZ);
+        int numBytesRead = read (server_socket, b, sizeof(b));
+
+        if(strcmp(b, ">>bye<<") == 0) break;
+
+        if(numBytesRead > 0)
+        {
+            printf("\"%s\"\n", b);
+            fflush(stdout);
+        }
+
+        lti++;
+    }
+    pthread_exit((void*) 0);
+}

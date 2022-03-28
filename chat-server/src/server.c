@@ -174,10 +174,15 @@ void* handleClient(void* clientSocket)
 
         if(strcmp(buffer, ">>bye<<") == 0) break;
 
-        broadcastMessage(client_sock, message);
+        printf("%s\n", message);
 
-        for(int i = 0; i < activeThreads; i++)
-            broadcastMessage(ml.clients[i].ip, message);
+        //broadcastMessage(client_sock, message);
+
+        if(numBytesRead > 0)
+        {
+            for(int i = 0; i < activeThreads; i++)
+                broadcastMessage(ml.clients[i].ip, message);
+        }
     }
 
     close(client_sock);
@@ -189,6 +194,7 @@ void* handleClient(void* clientSocket)
 int broadcastMessage(int socket, const char* msg)
 {
     write(socket, msg, strlen(msg));
+    printf("writing to socket %d :\t%s", socket, msg);
 }
 
 void cleanup(int server_sock)
