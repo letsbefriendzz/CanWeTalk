@@ -1,6 +1,5 @@
 #include "../inc/chat-client.h"
 #include "../../common/inc/common.h"
-
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
@@ -68,6 +67,8 @@ int main(int argc, char* argv[])
         close (my_server_socket);
         return 4;
     }
+
+    window_loop();
 
     done = 1;
     while(done == 1)

@@ -24,7 +24,7 @@ int window_loop(void)
   noecho();
   refresh();
   
-  shouldBlank = 0;
+  shouldBlank = 0; 
 
   chat_height = 5;
   chat_width  = COLS - 2;
@@ -48,6 +48,7 @@ int window_loop(void)
   for(i=0; i<5; i++)
   {    
     input_win(chat_win, buf);
+    //printf("%s\n", buf);
     display_win(msg_win, buf, i, shouldBlank);
   }
   sleep(3);                   /* to get a delay */
