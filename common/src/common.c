@@ -13,8 +13,26 @@ void logger(const char* user, const char* msg)
 
 int occursIn(const char* str, char c)
 {
-    int count;
+    int count = 0;
     for(int i = 0; i < strlen(str); i++)
         if(str[i] == c) count++;
     return count;
+}
+
+int getIndexOf(const char* str, char c, int ins)
+{
+    if(occursIn(str, c) < ins)
+        return -1;
+
+    int count = 0;
+    for(int i = 0; i < strlen(str); i++)
+    {
+        if(str[i] == c)
+            count++;
+
+        if(count == ins)
+            return i;
+    }
+
+    return -2;
 }
