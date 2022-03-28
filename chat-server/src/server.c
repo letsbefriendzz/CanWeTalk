@@ -33,8 +33,9 @@ int main()
     struct sockaddr_in  client_addr, server_addr;
     pthread_t           threads[MAX_CLIENTS];
 
-    initMasterList();
+    #pragma region init server
 
+    initMasterList();
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         logger(NAME, "Failed to create socket");
@@ -70,7 +71,9 @@ int main()
     }// log a success
     logger (NAME, "listen() call in server successful");
 
-    int i = 0;
+    #pragma endregion
+
+    #pragma region main listening loop
     do
     {
         // flush the toilet
@@ -103,11 +106,10 @@ int main()
         printf("THREADS RUNNING:\t%d\n", activeThreads);
 
     } while( activeThreads > 0 );
+    #pragma endregion
+
     printf("%d\n", activeThreads);
-
     cleanup(server_sock);
-
-    printf("meme\n");
 
     return 0;
 }
@@ -168,15 +170,12 @@ void* handleClient(void* clientSocket)
     {
         // clear out and get the next command and process
         memset(buffer,0,BUFSIZ);
+        memset(message,0,BUFSIZ);
+        
         int numBytesRead = read (client_sock, buffer, BUFSIZ);
-
-        sprintf (message, "COMMAND - %s", buffer);
-
+        
+        sprintf (message, "SERVER_SIDE - %s", buffer);
         if(strcmp(buffer, ">>bye<<") == 0) break;
-
-        printf("%s\n", message);
-
-        //broadcastMessage(client_sock, message);
 
         if(numBytesRead > 0)
         {
@@ -194,7 +193,14 @@ void* handleClient(void* clientSocket)
 int broadcastMessage(int socket, const char* msg)
 {
     write(socket, msg, strlen(msg));
-    printf("writing to socket %d :\t%s", socket, msg);
+    printf("writing to socket %d :\t%s\n", socket, msg);
+}
+
+//free() THIS FUNCTION'S RETURN VALUE
+const char* stripMessage(const char* msg)
+{
+    //char* msg = malloc(sizeof(char)*40);
+    return NULL;
 }
 
 void cleanup(int server_sock)

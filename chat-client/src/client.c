@@ -19,7 +19,7 @@ void* listen_thread(void* s);
 
 int main(int argc, char* argv[])
 {
-    int                 my_server_socket, len, done;
+    int                 server_socket, len, done;
     struct sockaddr_in  server_addr;
     struct hostent*     host;
     pthread_t           listener;
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     */
     logger (NAME, "Getting STREAM Socket to talk to SERVER");
     fflush(stdout);
-    if ((my_server_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0) 
+    if ((server_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0) 
     {
         logger (NAME, "Getting Client Socket - FAILED");
         return 3;
@@ -65,19 +65,19 @@ int main(int argc, char* argv[])
     */
     logger (NAME, "Connecting to SERVER");
     fflush(stdout);
-    if (connect (my_server_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0) 
+    if (connect (server_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0) 
     {
         logger (NAME, "Connect to Server - FAILED");
-        close (my_server_socket);
+        close (server_socket);
         return 4;
     }
 
 /*
-    window_loop(my_server_socket);
+    window_loop(server_socket);
     return -1;
 */
 
-    if (pthread_create(  &listener, NULL, listen_thread, (void *)&my_server_socket))
+    if (pthread_create(  &listener, NULL, listen_thread, (void *)&server_socket))
     {
         logger (NAME, "pthread_create() FAILED\n");
         fflush(stdout);
@@ -96,24 +96,29 @@ int main(int argc, char* argv[])
         //printf ("[%s] >>> ", userName);
         fflush (stdout);
         fgets (buffer, sizeof (buffer), stdin);
+        char message[BUFSIZ];
 
         if (buffer[strlen (buffer) - 1] == '\n')
             buffer[strlen (buffer) - 1] = '\0';
+
+        sprintf(message, "xxx.xxx.xxx.xxx [%5s] >> %s (HH:MM:SS)", userName, buffer);
+
+        printf("%s\n\n", message);
 
         /* check if the user wants to quit */
         if(strcmp(buffer,">>bye<<") == 0)
         {
             // send the command to the SERVER
-            write (my_server_socket, buffer, strlen (buffer));
+            write (server_socket, message, strlen (message));
             done = 0;
         }
         else
         {
-            write (my_server_socket, buffer, strlen (buffer));
+            write (server_socket, message, strlen (message));
         }
     }
 
-    close(my_server_socket);
+    close(server_socket);
     logger(NAME, "QUITTING...");
 }
 
@@ -142,7 +147,7 @@ void* listen_thread(void* s)
 
         if(numBytesRead > 0)
         {
-            printf("\"%s\"", b);
+            printf("%s\n", b);
             fflush(stdout);
         }
     }
