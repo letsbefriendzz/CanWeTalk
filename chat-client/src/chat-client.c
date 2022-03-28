@@ -3,7 +3,9 @@
 #include <fcntl.h>
 #include <string.h>
 #include <ncurses.h>
-     
+
+#include <netdb.h>
+
 WINDOW *create_newwin(int, int, int, int);
 void destroy_win(WINDOW *);
 void input_win(WINDOW *, char *);
@@ -11,7 +13,7 @@ void display_win(WINDOW *, char *, int, int);
 void destroy_win(WINDOW *win);
 void blankWin(WINDOW *win);
      
-int window_loop(void)
+int window_loop(int socket, struct sockaddr_in server, struct hostent* host)
 {
   WINDOW *chat_win, *msg_win;
   int chat_startx, chat_starty, chat_width, chat_height;
@@ -51,16 +53,7 @@ int window_loop(void)
     display_win(msg_win, buf, i, shouldBlank);
     i++;
   }
-  sleep(3);                   /* to get a delay */
-
-  /*
-  while(strcmp( buf, "quit" ) != 0)
-  {    
-    input_win(chat_win, buf);
-    display_win(msg_win, buf, i, shouldBlank);
-  }
-  sleep(3);     
-  */
+  sleep(3); /* to get a delay */
 
   /* tell the user that the 5 messages are done ... */
   shouldBlank = 1;
