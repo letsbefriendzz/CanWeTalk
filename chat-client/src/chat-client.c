@@ -8,7 +8,8 @@
 
 static volatile int exit = 1;
 static WINDOW *msg_win;
-static volatile int i = 0;
+static int i = 0;
+static int shouldBlank = 0;
 
 void* listener_func(void* l);
 int broadcastMessage(int socket, const char* msg);
@@ -16,11 +17,11 @@ int broadcastMessage(int socket, const char* msg);
 WINDOW *create_newwin(int, int, int, int);
 void destroy_win(WINDOW *);
 void input_win(WINDOW *, char *);
-void display_win(WINDOW *, char *, int, int);
+void display_win(WINDOW *, const char *, int, int);
 void destroy_win(WINDOW *win);
 void blankWin(WINDOW *win);
 
-void threadWindowTest(char* msg)
+void threadWindowTest(const char* msg)
 {
   display_win(msg_win, msg, i, 0);
 }
@@ -28,7 +29,7 @@ void threadWindowTest(char* msg)
 int window_loop(int socket)
 {
   pthread_t listener;
-  pthread_create( &listener, NULL , listener_func, (void *)&socket);
+  //pthread_create( &listener, NULL , listener_func, (void *)&socket);
   sleep(1);
   printf("EXIT:\t%d\n", exit);
   //return -1;
@@ -37,7 +38,6 @@ int window_loop(int socket)
   WINDOW *chat_win;
   int chat_startx, chat_starty, chat_width, chat_height;
   int msg_startx, msg_starty, msg_width, msg_height, i;
-  int shouldBlank = 0;
   char buf[BUFSIZ];
 
   initscr();                      /* Start curses mode*/
@@ -72,18 +72,16 @@ int window_loop(int socket)
     broadcastMessage(socket, buf);
     //display_win(msg_win, buf, i, shouldBlank);
     //printf("\n%s\n", buf);
-    sleep(1);
-    //threadWindowTest(buf);
+    threadWindowTest((const char*)buf);
     i++;
   }
-  sleep(3); /* to get a delay */
 
   /* tell the user that the 5 messages are done ... */
   shouldBlank = 1;
   sprintf(buf,"Messaging is complete ... destroying window in 5 seconds");
   display_win(msg_win, buf, 0, shouldBlank);
   
-  sleep(5); //to get a delay
+  sleep(1);
      
   destroy_win(chat_win);
   destroy_win(msg_win);
@@ -143,7 +141,7 @@ void input_win(WINDOW *win, char *word)
   }
 }  /* input_win */
      
-void display_win(WINDOW *win, char *word, int whichRow, int shouldBlank)
+void display_win(WINDOW *win, const char *word, int whichRow, int shouldBlank)
 {
   // if shouldBlank flag is set, clear the window
   if(shouldBlank == 1)
@@ -181,16 +179,14 @@ void* listener_func(void* s)
   char buffer[BUFSIZ];
   while( 1 )
   {
-    /*
-      // clear out and get the next command and process
-      memset(buffer,0,BUFSIZ);
-      int numBytesRead = read (server_socket, buffer, BUFSIZ);
+    // clear out and get the next command and process
+    memset(buffer,0,BUFSIZ);
+    int numBytesRead = read (server_socket, buffer, BUFSIZ);
 
-      if(strcmp(buffer, "asdf") == 0) break;
+    if(strcmp(buffer, ">>bye<<") == 0) break;
 
-      display_win(msg_win, buffer, i, 0);
-      i++;
-    */
+    display_win(msg_win, buffer, i, 0);
+    i++;
   }
   pthread_exit((void*) 0);
 }
