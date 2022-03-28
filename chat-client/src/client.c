@@ -132,8 +132,6 @@ void* listen_thread(void* s)
 {
     int server_socket = *(int*)s;
     char b[BUFSIZ];
-
-    int lti = 0;
     while( 1 )
     {
         // clear out and get the next command and process
@@ -144,11 +142,9 @@ void* listen_thread(void* s)
 
         if(numBytesRead > 0)
         {
-            printf("\"%s\"\n", b);
+            printf("\"%s\"", b);
             fflush(stdout);
         }
-
-        lti++;
     }
     pthread_exit((void*) 0);
 }

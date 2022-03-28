@@ -170,7 +170,7 @@ void* handleClient(void* clientSocket)
         memset(buffer,0,BUFSIZ);
         int numBytesRead = read (client_sock, buffer, BUFSIZ);
 
-        sprintf (message, "COMMAND - %s\n", buffer);
+        sprintf (message, "COMMAND - %s", buffer);
 
         if(strcmp(buffer, ">>bye<<") == 0) break;
 
