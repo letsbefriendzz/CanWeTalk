@@ -21,8 +21,10 @@
 
 static int MASTER_ROW = 0;
 static char* TEST_VALS[5] = { "test1", "test2", "test3", "test4", "test5" };
+static volatile int exec = 0;
 
 void* listenerThread(void* param);
+void* writerThead(void* param);
 void flush();
 ////////////////////////////////////////////     
 WINDOW *create_newwin(int, int, int, int);
@@ -40,16 +42,13 @@ void appendToWindow( WINDOW* win, char* word, int shouldBlank )
 
 int window_loop(int server_socket, const char* userName)
 {
-  pthread_t listener;
-
-  static WINDOW *msg_win;
-  static WINDOW *chat_win;
+  WINDOW *chat_win, *msg_win;
   int chat_startx, chat_starty, chat_width, chat_height;
   int msg_startx, msg_starty, msg_width, msg_height, i;
   int shouldBlank;
   char buf[BUFSIZ];
 
-  initscr();                      /*Start curses mode*/
+  initscr();                      /* Start curses mode            */
   cbreak();
   noecho();
   refresh();
@@ -74,61 +73,25 @@ int window_loop(int server_socket, const char* userName)
   chat_win = create_newwin(chat_height, chat_width, chat_starty, chat_startx);
   scrollok(chat_win, TRUE);
 
-  listenerParameters lp;
-  lp.window = msg_win;
-  lp.socket = server_socket;
+  /* allow the user to input 5 messages for display */ 
+  threadParameters l;
+  l.socket    = server_socket;
+  l.window    = msg_win;
+  l.userName  = NULL;
+  listenerThread( (void*)&l );
 
-  if (pthread_create( &listener, NULL, listenerThread, (void *)&lp))
-  {
-    printf("failed to create thread");
-    fflush(stdout);
-    return 5;
-  }
+  getchar();
 
-  sleep(0.1); /* */
-
-  int done = 1;
-  while(done == 1)
-  {
-    // reset buffer to nill
-    memset(buf,0,MAX_MSG);
-    // get input from the user
-    input_win(chat_win, buf);
-    replace(buf, '|', ';');
-    if( strlen(buf) < 40 )
-    {
-      char message[BUFSIZ];
-
-      // strip a newline from the input, if it is present
-      if (buf[strlen (buf) - 1] == '\n')
-        buf[strlen (buf) - 1] = '\0';
-
-      // format the message -- ONLY the username, msg and time()
-      sprintf(message, "[%-5s] >>|%-40s|(HH:MM:SS)", userName, buf);
-
-      // if the user inputs >>bye<<, we can set the done flag to 0
-      if(strcmp(buf,">>bye<<") == 0)
-        done = 0;
-
-      // appendToWindow(lp.window, message, 0);
-
-      // done or not, we write to the server
-      write (server_socket, message, strlen (message));
-    }
-  }
-
+  /* tell the user that the 5 messages are done ... */
   shouldBlank = 1;
   sprintf(buf,"Messaging is complete ... destroying window in 5 seconds");
-  MASTER_ROW = 0;
-  appendToWindow(msg_win, buf, 1);
+  display_win(msg_win, buf, 0, shouldBlank);
   
-  sleep(2);                   /* to get a delay */  
+  sleep(2); /* to get a delay */
      
   destroy_win(chat_win);
   destroy_win(msg_win);
   endwin();
-
-  printf("DONE\n");
 }
      
 WINDOW *create_newwin(int height, int width, int starty, int startx)
@@ -213,27 +176,70 @@ void blankWin(WINDOW *win)
 
 void* listenerThread(void* param)
 {
-  listenerParameters lp = *((listenerParameters*)param);
+  threadParameters lp = *((threadParameters*)param);
   char b[PACKET_WIDTH];
 
-  while( 1 )
+  while( exec == 0 )
   {
       // our local buffer, just in case
       //memset(b,0,PACKET_WIDTH);
-      //int numBytesRead = read (lp.socket, b, sizeof(b));
+      // int numBytesRead = read (lp.socket, b, sizeof(b));
 
       //if(strcmp(b, ">>bye<<") == 0) break;
 
-      if( 1 > 0)
+      if( 1 > 0 )
       {
         //printf("%s\n",b);
         //printf("%ld : %d", strlen(b), numBytesRead);
         appendToWindow( lp.window, "test word", 0 );
       }
-
     sleep(1);
   }
+  //pthread_exit((void*) 0);
+  return NULL;
+}
+
+void* writerThead(void* param)
+{
+  threadParameters p = *((threadParameters*)param);
+  char buf[BUFSIZ];
+  while(exec == 0)
+  {
+    // reset buffer to nill
+    memset(buf,0,MAX_MSG);
+    // get input from the user
+    input_win(p.window, buf);
+    replace(buf, '|', ';');
+    if( strlen(buf) < 40 )
+    {
+      char message[BUFSIZ];
+
+      // strip a newline from the input, if it is present
+      if (buf[strlen (buf) - 1] == '\n')
+        buf[strlen (buf) - 1] = '\0';
+
+      // format the message -- ONLY the username, msg and time()
+      sprintf(message, "[%-5s] >>|%-40s|(HH:MM:SS)", p.userName, buf);
+
+      // if the user inputs >>bye<<, we can set the done flag to 0
+      if(strcmp(buf,">>bye<<") == 0)
+        exec == 1;
+
+      // appendToWindow(lp.window, message, 0);
+
+      // done or not, we write to the server
+      write (p.socket, message, strlen (message));
+    }
+  }
+
   pthread_exit((void*) 0);
+
+  /*
+  shouldBlank = 1;
+  sprintf(buf,"Messaging is complete ... destroying window in 5 seconds");
+  MASTER_ROW = 0;
+  appendToWindow(msg_win, buf, 1);
+  */
 }
 
 void flush()
@@ -241,14 +247,3 @@ void flush()
   fflush(stdout);
   fflush(stdin);
 }
-
-/*
-  sleep(1);
-  while(1)
-  {
-    appendToWindow(lp.window, "192.168.2.112   [asdf ] >> test                                     (HH:MM:SS)", 0);
-    sleep(1);
-  }
-
-  pthread_exit((void*) 0);
-*/

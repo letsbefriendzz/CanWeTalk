@@ -7,11 +7,12 @@
 #define USER_PREFIX "-user"
 #define MAX_MSG 40
 
-typedef struct listenerParameters
+typedef struct threadParameters
 {
     WINDOW* window;
     int socket;
-} listenerParameters;
+    const char* userName;
+} threadParameters;
 
 int window_loop(int, const char*);
 
