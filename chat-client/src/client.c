@@ -20,14 +20,6 @@ void* listen_thread(void* s);
 
 int main(int argc, char* argv[])
 {
-    const char* string1 = "this is a test";
-    char* string2 = subString(string1, 4,9);
-    printf("%s\n", string2);
-    printf("%ld\n", strlen(string2));
-    free(string2);
-    
-    return -1;
-
     ///////////////////////////////////////////////////////////////////
 
     int                 server_socket, len, done;
