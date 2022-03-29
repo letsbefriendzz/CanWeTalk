@@ -190,7 +190,7 @@ void* handleClient(void* clientData)
             for(int i = 0; i < ml.activeClients; i++)
             {
                 write(ml.clients[i].ip, message, strlen(message));
-                // printf("writing to socket %d :\t%s\n\n", socket, message);
+                printf("writing to socket %d :\t%s\n\n", ml.clients[i].ip, message);
             }
         }
     }

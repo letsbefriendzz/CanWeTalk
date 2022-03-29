@@ -85,6 +85,11 @@ int main(int argc, char* argv[])
 
     #pragma endregion
 
+    window_loop(server_socket, userName);
+    return -1;
+
+    ///////////////////////////////////////////////////////////////////
+
     #pragma region creating listener thread
 
     if (pthread_create(  &listener, NULL, listen_thread, (void *)&server_socket))
