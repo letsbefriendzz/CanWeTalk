@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 {
     ///////////////////////////////////////////////////////////////////
 
-    char buffer[BUFSIZ];
+    char buffer[MAX_MSG];
     int                 server_socket, len, done;
     struct sockaddr_in  server_addr;
     struct hostent*     host;
@@ -99,28 +99,34 @@ int main(int argc, char* argv[])
     while(done == 1)
     {
         // reset buffer to nill
-        memset(buffer,0,BUFSIZ);
+        memset(buffer,0,MAX_MSG);
 
         // flush the toilet
         fflush (stdout);
 
         // get input from the user
         fgets (buffer, sizeof (buffer), stdin);
-        char message[BUFSIZ];
 
-        // strip a newline from the input, if it is present
-        if (buffer[strlen (buffer) - 1] == '\n')
-            buffer[strlen (buffer) - 1] = '\0';
+        if(strlen(buffer) < 80)
+        {
+            char message[BUFSIZ];
 
-        // format the message -- ONLY the username, msg and time()
-        sprintf(message, "[%-5s]|>>|%-40s|(HH:MM:SS)", userName, buffer);
+            // strip a newline from the input, if it is present
+            if (buffer[strlen (buffer) - 1] == '\n')
+                buffer[strlen (buffer) - 1] = '\0';
 
-        // if the user inputs >>bye<<, we can set the done flag to 0
-        if(strcmp(buffer,">>bye<<") == 0)
-            done = 0;
+            // format the message -- ONLY the username, msg and time()
+            sprintf(message, "[%-5s]|>>|%-40s|(HH:MM:SS)", userName, buffer);
 
-        // done or not, we write to the server
-        write (server_socket, message, strlen (message));
+            // if the user inputs >>bye<<, we can set the done flag to 0
+            if(strcmp(buffer,">>bye<<") == 0)
+                done = 0;
+
+            // done or not, we write to the server
+            write (server_socket, message, strlen (message));
+        }
+        else
+            printf("LONG STRING MEME\n\n");
     }
 
     #pragma endregion

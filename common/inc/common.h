@@ -2,6 +2,7 @@
 #define COMMON_H
 
 #define PORT 5000
+#define MSG_WIDTH 78
 
 typedef struct message
 {
