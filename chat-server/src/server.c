@@ -26,9 +26,12 @@ void displayMasterList();
 int removeFromMasterList( int index );
 void initMasterList();
 int broadcastMessage(int socket, const char* msg);
+const char* stripMessage(const char* msg);
 
 int main()
 {
+    /////////////////////////////////////////////////////////////////
+
     int                 server_sock, client_sock, client_len;
     struct sockaddr_in  client_addr, server_addr;
     pthread_t           threads[MAX_CLIENTS];
@@ -175,7 +178,10 @@ void* handleClient(void* clientSocket)
         int numBytesRead = read (client_sock, buffer, BUFSIZ);
         
         sprintf (message, "SERVER_SIDE - %s", buffer);
-        if(strcmp(buffer, ">>bye<<") == 0) break;
+
+        char* stripped_message = stripMessage(buffer);
+        if(strcmp(stripped_message, ">>bye<<") == 0) break;
+        free(stripped_message);
 
         if(numBytesRead > 0)
         {
@@ -199,8 +205,7 @@ int broadcastMessage(int socket, const char* msg)
 //free() THIS FUNCTION'S RETURN VALUE
 const char* stripMessage(const char* msg)
 {
-    //char* msg = malloc(sizeof(char)*40);
-    return NULL;
+    return subString( msg, getIndexOf(msg, '|', 3), getIndexOf(msg, '|', 4) );
 }
 
 void cleanup(int server_sock)

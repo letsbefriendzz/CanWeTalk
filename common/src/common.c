@@ -43,10 +43,10 @@ const char* subString(const char* str, int s, int e)
     if(( e-s ) < 1 || s < 0 || e > strlen(str))
         return NULL;
 
-    char* rtrn = malloc(sizeof(char) * ((e-s)+1) );
-    for(int i = s; i < e; i++)
+    char* rtrn = malloc(sizeof(char) * ((e-s)) );
+    for(int i = s+1; i < e; i++)
     {   
-        rtrn[i-s] = str[i];
+        rtrn[i-(s+1)] = str[i];
     }
     return rtrn;
 }

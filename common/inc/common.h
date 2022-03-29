@@ -14,5 +14,7 @@ void helloWorld();
 void logger(const char* user, const char* msg);
 const char* constructMessage(message* m);
 int occursIn(const char*, char);
+int getIndexOf(const char* str, char c, int ins);
+const char* subString(const char* str, int s, int e);
 
 #endif
