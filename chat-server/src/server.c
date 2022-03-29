@@ -151,7 +151,7 @@ PARM    : void*
 */
 void* handleClient(void* clientData)
 {
-    char buffer[BUFSIZ];
+    char buffer[PACKET_WIDTH];
     char message[BUFSIZ];
     //int client_sock = *((int*)clientSocket);
     listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
@@ -162,7 +162,7 @@ void* handleClient(void* clientData)
     while( 1 )
     {
         // clear out and get the next command and process
-        memset(buffer,0,BUFSIZ);
+        memset(buffer,0,PACKET_WIDTH);
         memset(message,0,BUFSIZ);
         
         // attempt to read from the socket
@@ -190,7 +190,7 @@ void* handleClient(void* clientData)
             for(int i = 0; i < ml.activeClients; i++)
             {
                 write(ml.clients[i].ip, message, strlen(message));
-                printf("writing to socket %d :\t%s\n\n", socket, message);
+                // printf("writing to socket %d :\t%s\n\n", socket, message);
             }
         }
     }

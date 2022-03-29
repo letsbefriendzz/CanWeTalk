@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 {
     ///////////////////////////////////////////////////////////////////
 
-    char buffer[80];
+    char buffer[40];
     int                 server_socket, len, done;
     struct sockaddr_in  server_addr;
     struct hostent*     host;
