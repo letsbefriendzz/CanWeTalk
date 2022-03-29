@@ -109,6 +109,7 @@ int main(int argc, char* argv[])
 
         // get input from the user
         fgets (buffer, sizeof (buffer), stdin);
+        replace(buffer, '|', ';');
 
         if(strlen(buffer) < 40)
         {
