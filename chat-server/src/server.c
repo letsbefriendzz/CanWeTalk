@@ -21,7 +21,6 @@ volatile masterList ml;
 
 void* handleClient( void* clientSocket );
 void cleanup( int server_sock );
-int broadcastMessage(int socket, const char* msg);
 char* stripMessage(char* msg);
 
 int main()
@@ -32,7 +31,7 @@ int main()
     struct sockaddr_in  client_addr, server_addr;
     pthread_t           threads[MAX_CLIENTS];
 
-    #pragma region init server
+    #pragma region init server & masterList
 
     initMasterList( &ml );
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -189,7 +188,10 @@ void* handleClient(void* clientData)
         if(numBytesRead > 0)
         {
             for(int i = 0; i < ml.activeClients; i++)
-                broadcastMessage(ml.clients[i].ip, message);
+            {
+                write(socket, message, strlen(message));
+                printf("writing to socket %d :\t%s\n\n", socket, message);
+            }
         }
     }
 
@@ -197,14 +199,8 @@ void* handleClient(void* clientData)
     removeFromMasterList( &ml, clientIndex );
     // decrement the activeClients member of the masterList
     ml.activeClients--;
-    // return 0; not that we're checking
+    // return 0; not that we're
     pthread_exit( (void *) (0) );
-}
-
-int broadcastMessage(int socket, const char* msg)
-{
-    write(socket, msg, strlen(msg));
-    printf("writing to socket %d :\t%s\n\n", socket, msg);
 }
 
 //free() THIS FUNCTION'S RETURN VALUE
