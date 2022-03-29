@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 {
     ///////////////////////////////////////////////////////////////////
 
-    char buffer[MAX_MSG];
+    char buffer[80];
     int                 server_socket, len, done;
     struct sockaddr_in  server_addr;
     struct hostent*     host;
@@ -46,6 +46,9 @@ int main(int argc, char* argv[])
             logger (NAME, "Username provided is longer than max character length (5)");
             return -2;
         }
+
+        // purify username
+        replace(userName, '|', ';');
     }
 
     #pragma endregion
@@ -107,7 +110,7 @@ int main(int argc, char* argv[])
         // get input from the user
         fgets (buffer, sizeof (buffer), stdin);
 
-        if(strlen(buffer) < 80)
+        if(strlen(buffer) < 40)
         {
             char message[BUFSIZ];
 
@@ -116,7 +119,7 @@ int main(int argc, char* argv[])
                 buffer[strlen (buffer) - 1] = '\0';
 
             // format the message -- ONLY the username, msg and time()
-            sprintf(message, "[%-5s]|>>|%-40s|(HH:MM:SS)", userName, buffer);
+            sprintf(message, "[%-5s] >>|%-40s|(HH:MM:SS)", userName, buffer);
 
             // if the user inputs >>bye<<, we can set the done flag to 0
             if(strcmp(buffer,">>bye<<") == 0)
@@ -160,7 +163,6 @@ void* listen_thread(void* s)
 
         if(numBytesRead > 0)
         {
-            replace(b, '|', ' ');
             printf("%s\n", b);
             fflush(stdout);
         }

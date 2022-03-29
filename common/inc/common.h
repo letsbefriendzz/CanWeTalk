@@ -2,7 +2,12 @@
 #define COMMON_H
 
 #define PORT 5000
-#define MSG_WIDTH 78
+#define PACKET_WIDTH 78
+
+#define IP_START    0
+#define USER_START  15
+#define MSG_START   26
+#define TIME_START  67
 
 typedef struct message
 {
