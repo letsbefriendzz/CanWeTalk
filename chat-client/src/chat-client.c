@@ -24,8 +24,7 @@ static char* TEST_VALS[5] = { "test1", "test2", "test3", "test4", "test5" };
 
 void* listenerThread(void* param);
 void flush();
-////////////////////////////////////////////
-     
+////////////////////////////////////////////     
 WINDOW *create_newwin(int, int, int, int);
 void destroy_win(WINDOW *);
 void input_win(WINDOW *, char *);
@@ -36,22 +35,21 @@ void blankWin(WINDOW *win);
 void appendToWindow( WINDOW* win, char* word, int shouldBlank )
 {
   display_win(win, word, MASTER_ROW, shouldBlank);
-  fflush(stdout);
   MASTER_ROW++;
 }
 
 int window_loop(int server_socket, const char* userName)
 {
-  flush();
   pthread_t listener;
 
-  WINDOW *chat_win, *msg_win;
+  static WINDOW *msg_win;
+  static WINDOW *chat_win;
   int chat_startx, chat_starty, chat_width, chat_height;
   int msg_startx, msg_starty, msg_width, msg_height, i;
   int shouldBlank;
   char buf[BUFSIZ];
 
-  initscr();                      /* Start curses mode            */
+  initscr();                      /*Start curses mode*/
   cbreak();
   noecho();
   refresh();
@@ -78,6 +76,7 @@ int window_loop(int server_socket, const char* userName)
 
   listenerParameters lp;
   lp.window = msg_win;
+  lp.socket = server_socket;
 
   if (pthread_create( &listener, NULL, listenerThread, (void *)&lp))
   {
@@ -86,21 +85,17 @@ int window_loop(int server_socket, const char* userName)
     return 5;
   }
 
-  sleep(0.1);
+  sleep(0.1); /* */
 
-  /* allow the user to input 5 messages for display */
   int done = 1;
-  for(i=0; i<5; i++)
-  {    
-    flush();
-    
+  while(done == 1)
+  {
     // reset buffer to nill
     memset(buf,0,MAX_MSG);
     // get input from the user
     input_win(chat_win, buf);
-    flush();
     replace(buf, '|', ';');
-    if(strlen(buf) < 40)
+    if( strlen(buf) < 40 )
     {
       char message[BUFSIZ];
 
@@ -115,15 +110,13 @@ int window_loop(int server_socket, const char* userName)
       if(strcmp(buf,">>bye<<") == 0)
         done = 0;
 
+      // appendToWindow(lp.window, message, 0);
+
       // done or not, we write to the server
       write (server_socket, message, strlen (message));
     }
   }
 
-  //sleep(3);
-
-
-  /* tell the user that the 5 messages are done ... */
   shouldBlank = 1;
   sprintf(buf,"Messaging is complete ... destroying window in 5 seconds");
   MASTER_ROW = 0;
@@ -136,11 +129,10 @@ int window_loop(int server_socket, const char* userName)
   endwin();
 
   printf("DONE\n");
-  fflush(stdout);
 }
      
 WINDOW *create_newwin(int height, int width, int starty, int startx)
-{       
+{
   WINDOW *local_win;
      
   local_win = newwin(height, width, starty, startx);
@@ -222,12 +214,23 @@ void blankWin(WINDOW *win)
 void* listenerThread(void* param)
 {
   listenerParameters lp = *((listenerParameters*)param);
-  for(int i = 0; i < 5; i++)
+  char b[PACKET_WIDTH];
+
+  while( 1 )
   {
-    appendToWindow( lp.window, TEST_VALS[i], 0 );
-    flush();
-    //printf("%d\n", MASTER_ROW);
-    //refresh();
+      // our local buffer, just in case
+      //memset(b,0,PACKET_WIDTH);
+      //int numBytesRead = read (lp.socket, b, sizeof(b));
+
+      //if(strcmp(b, ">>bye<<") == 0) break;
+
+      if( 1 > 0)
+      {
+        //printf("%s\n",b);
+        //printf("%ld : %d", strlen(b), numBytesRead);
+        appendToWindow( lp.window, "test word", 0 );
+      }
+
     sleep(1);
   }
   pthread_exit((void*) 0);
@@ -238,3 +241,14 @@ void flush()
   fflush(stdout);
   fflush(stdin);
 }
+
+/*
+  sleep(1);
+  while(1)
+  {
+    appendToWindow(lp.window, "192.168.2.112   [asdf ] >> test                                     (HH:MM:SS)", 0);
+    sleep(1);
+  }
+
+  pthread_exit((void*) 0);
+*/

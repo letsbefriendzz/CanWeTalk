@@ -10,6 +10,7 @@
 typedef struct listenerParameters
 {
     WINDOW* window;
+    int socket;
 } listenerParameters;
 
 int window_loop(int, const char*);
