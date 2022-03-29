@@ -20,6 +20,9 @@ int occursIn(const char* str, char c)
     return count;
 }
 
+// i love writing string manipulation functions that just work
+// otherwise, C strings are insufferable to work with
+
 int getIndexOf(const char* str, char c, int ins)
 {
     if(occursIn(str, c) < ins)
@@ -38,7 +41,7 @@ int getIndexOf(const char* str, char c, int ins)
     return -2;
 }
 
-char* subString(const char* str, int s, int e)
+char* subString(char* str, int s, int e)
 {
     if(( e-s ) < 1 || s < 0 || e > strlen(str) || strlen(str) < 1)
         return NULL;

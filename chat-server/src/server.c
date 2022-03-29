@@ -26,7 +26,7 @@ void displayMasterList();
 int removeFromMasterList( int index );
 void initMasterList();
 int broadcastMessage(int socket, const char* msg);
-const char* stripMessage(const char* msg);
+char* stripMessage(char* msg);
 
 int main()
 {
@@ -93,7 +93,10 @@ int main()
 
         fflush(stdout);
         logger (NAME, "received a packet from NEW CLIENT");
-        if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&client_sock))
+        listenThreadParameters ltp;
+        ltp.client_addr = client_addr;
+        ltp.client_sock = client_sock;
+        if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&ltp))
         {
             logger (NAME, "pthread_create() FAILED\n");
             fflush(stdout);
@@ -108,10 +111,6 @@ int main()
 
         displayMasterList();
         printf("THREADS RUNNING:\t%d\n", activeThreads);
-
-        char ipbuffer[128];
-        inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
-        printf("IP BUFFER:\t%s\n", ipbuffer);
 
     } while( activeThreads > 0 );
 
@@ -167,11 +166,12 @@ void initMasterList()
     }
 }
 
-void* handleClient(void* clientSocket)
+void* handleClient(void* clientData)
 {
     char buffer[BUFSIZ];
     char message[BUFSIZ];
-    int client_sock = *((int*)clientSocket);
+    //int client_sock = *((int*)clientSocket);
+    listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
     int threadIndex = activeThreads;
     activeThreads++;
 
@@ -181,9 +181,12 @@ void* handleClient(void* clientSocket)
         memset(buffer,0,BUFSIZ);
         memset(message,0,BUFSIZ);
         
-        int numBytesRead = read (client_sock, buffer, BUFSIZ);
+        int numBytesRead = read (ltp.client_sock, buffer, BUFSIZ);
+
+        char ipbuffer[128];
+        inet_ntop(AF_INET, &ltp.client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
         
-        sprintf (message, "SERVER_SIDE - %s", buffer);
+        sprintf (message, "%s|%s", ipbuffer, buffer);
 
         char* stripped_message = stripMessage(buffer);
         if(strcmp(stripped_message, ">>bye<<") == 0) break;
@@ -196,7 +199,7 @@ void* handleClient(void* clientSocket)
         }
     }
 
-    close(client_sock);
+    close(ltp.client_sock);
     removeFromMasterList(threadIndex);
     activeThreads--;
     pthread_exit( (void *) (0) );
@@ -209,9 +212,9 @@ int broadcastMessage(int socket, const char* msg)
 }
 
 //free() THIS FUNCTION'S RETURN VALUE
-const char* stripMessage(const char* msg)
+char* stripMessage( char* msg)
 {
-    return subString( msg, getIndexOf(msg, '|', 3), getIndexOf(msg, '|', 4) );
+    return subString( msg, getIndexOf(msg, '|', 2), getIndexOf(msg, '|', 3) );
 }
 
 void cleanup(int server_sock)
