@@ -1,8 +1,10 @@
+#include "../inc/chat-server.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include "../inc/chat-server.h"
+#include <time.h>
 
 /*
 NAME    : removeFromMasterList
@@ -65,4 +67,14 @@ void displayMasterList( volatile masterList* list )
     }
 
     printf("==============================\n");
+}
+
+void countdown(int s)
+{
+    printf("COUNTDOWN FROM %d STARTING\n\n", s);
+    for(int i = 0; i < s; i++)
+    {
+        printf("%d\n", (s - i) );
+        sleep(1);
+    }
 }

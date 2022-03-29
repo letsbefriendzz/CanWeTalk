@@ -2,6 +2,7 @@
 #include "../inc/chat-server.h"
 
 #include <sys/socket.h>
+#include <fcntl.h>
 #include <sys/types.h>
 
 #include <netdb.h>
@@ -69,9 +70,19 @@ int main()
     }// log a success
     logger (NAME, "listen() call in server successful");
 
+    // magic that results in our socket being nonblocking
+    if( fcntl(server_sock, F_SETFL, fcntl(server_sock, F_GETFL, 0) | O_NONBLOCK) < 0 )
+    {
+        logger (NAME, "attempt to make socket nonblocking failed");
+        cleanup(server_sock);
+        return -4;
+    }
+
     #pragma endregion
 
     #pragma region main listening loop
+
+    countdown(15);
 
     do
     {
@@ -81,39 +92,41 @@ int main()
         // if accept() returns < 0, an error has occured
         if ( ( client_sock = accept (server_sock,(struct sockaddr *)&client_addr, &client_len ) ) < 0)
         {
-            logger(NAME, "accept() call in server failed");
-            fflush(stdout);	
-            return -4;
-        }
-
-        fflush(stdout);
-        logger (NAME, "received a packet from NEW CLIENT");
-
-        #pragma region populate listenThreadParameters instance
-        
-        char ipbuffer[32];
-        inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
-        listenThreadParameters ltp;
-        strcpy(ltp.ip, ipbuffer);
-        ltp.client_sock = client_sock;
-
-        #pragma endregion
-
-        if (pthread_create(  &(threads[(ml.activeClients-1)])  , NULL , handleClient, (void *)&ltp))
-        {
-            logger (NAME, "pthread_create() FAILED\n");
-            fflush(stdout);
-            return 5;
+            //logger(NAME, "accept() call in server failed");
+            // fflush(stdout);	
+            //return -4;
         }
         else
         {
-            logger(NAME, "Created new thread");
-            ml.clients[ml.activeClients].ip = client_sock;
+            fflush(stdout);
+            logger (NAME, "received a packet from NEW CLIENT");
+
+            #pragma region populate listenThreadParameters instance
+            
+            char ipbuffer[32];
+            inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
+            listenThreadParameters ltp;
+            strcpy(ltp.ip, ipbuffer);
+            ltp.client_sock = client_sock;
+
+            #pragma endregion
+
+            if (pthread_create(  &(threads[(ml.activeClients-1)])  , NULL , handleClient, (void *)&ltp))
+            {
+                logger (NAME, "pthread_create() FAILED\n");
+                fflush(stdout);
+                return 5;
+            }
+            else
+            {
+                logger(NAME, "Created new thread");
+                ml.clients[ml.activeClients].ip = client_sock;
+            }
+
+            displayMasterList( &ml );
+            printf("THREADS RUNNING:\t%d\n", ml.activeClients);
+            sleep(1);
         }
-
-        displayMasterList( &ml );
-        printf("THREADS RUNNING:\t%d\n", ml.activeClients);
-
     } while( ml.activeClients > 0 );
 
     #pragma endregion
