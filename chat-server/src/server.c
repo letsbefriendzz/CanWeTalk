@@ -18,7 +18,6 @@
 #define NAME "SERVER"
 
 volatile masterList ml;
-static volatile int activeThreads = 0;
 
 void* handleClient( void* clientSocket );
 void cleanup( int server_sock );
@@ -93,7 +92,7 @@ int main()
         logger (NAME, "received a packet from NEW CLIENT");
 
         #pragma region populate listenThreadParameters instance
-
+        
         char ipbuffer[32];
         inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
         listenThreadParameters ltp;
@@ -102,7 +101,7 @@ int main()
 
         #pragma endregion
 
-        if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&ltp))
+        if (pthread_create(  &(threads[(ml.activeClients-1)])  , NULL , handleClient, (void *)&ltp))
         {
             logger (NAME, "pthread_create() FAILED\n");
             fflush(stdout);
@@ -111,18 +110,16 @@ int main()
         else
         {
             logger(NAME, "Created new thread");
-            ml.clients[activeThreads].ip = client_sock;
-            // activeThreads is iterated within the threads themselves.
+            ml.clients[ml.activeClients].ip = client_sock;
         }
 
         displayMasterList();
         printf("THREADS RUNNING:\t%d\n", ml.activeClients);
 
-    } while( activeThreads > 0 );
+    } while( ml.activeClients > 0 );
 
     #pragma endregion
-
-    printf("%d\n", activeThreads);
+    
     cleanup(server_sock);
 
     return 0;
@@ -146,7 +143,6 @@ void* handleClient(void* clientData)
     listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
     int threadIndex = ml.activeClients;
     
-    activeThreads++;
     ml.activeClients++;
 
     while( 1 )
@@ -158,34 +154,21 @@ void* handleClient(void* clientData)
         // attempt to read from the socket
         int numBytesRead = read (ltp.client_sock, buffer, BUFSIZ);
         
-        // format the message; we append the IP here
-        // also replace bars with spaces; i pinch the msg from the client
-        // in bars for ease of access.
-        replace(buffer, '|', ' ');
         sprintf (message, "%-15s %s", ltp.ip, buffer);
+        replace(message, '|', ' ');
 
-        // strip the message to the first word, and check if it's >>bye<<;
-        // if it is, we terminate the program.
         char* stripped_message = stripMessage(buffer);
-        if(strcmp(stripped_message, ">>bye<<") == 0)
-        {
-            // free memory
-            free(stripped_message);
-            break;
-        }
-        // still free memory
+        if(strcmp(stripped_message, ">>bye<<") == 0) break;
         free(stripped_message);
 
-        // if we read anything, iterate over master list and broadcast
         if(numBytesRead > 0)
         {
-            for(int i = 0; i < activeThreads; i++)
+            for(int i = 0; i < ml.activeClients; i++)
                 broadcastMessage(ml.clients[i].ip, message);
         }
     }
     removeFromMasterList( &ml, threadIndex );
     ml.activeClients--;
-    activeThreads--;
     pthread_exit( (void *) (0) );
 }
 
