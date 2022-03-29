@@ -5,16 +5,23 @@
 #include "../inc/chat-server.h"
 
 /*
-Removes and flattens the masterList given an index to delete.
+NAME    : removeFromMasterList
+DESC    :
+    The masterList struct contains an array of ten client instances.
+    This function compresses the list nicely when a node is removed.
+    This is copied from my hoochamacallit solution.
+RTRN    : int
+PARM    : voaltile masterList*, int
 */
 int removeFromMasterList( volatile masterList* list, int index )
 {
+    // if we're removing the end of the list, just make the values invalid
     if ( index + 1 == list->activeClients )
     {
         list->clients[index].ip   = -1;
         list->clients[index].name = NULL;
     }
-    else
+    else // otherwise, iterate over the list and compress it, overwriting our list->clients[index].
     {
         for(int i = index; i < list->activeClients; i++)
         {
@@ -26,7 +33,11 @@ int removeFromMasterList( volatile masterList* list, int index )
 }
 
 /*
-Sets all values of the global masterList instance to empty values.
+NAME    : initMasterList
+DESC    :
+    Sets all values of a masterList instance to empty values.
+RTRN    : //
+PARM    : volatile masterList8
 */
 void initMasterList( volatile masterList* list )
 {
@@ -38,6 +49,14 @@ void initMasterList( volatile masterList* list )
     }
 }
 
+/*
+NAME    : displayMasterList
+DESC    :
+    Displays the contents of a volatile masterList pointer.
+    Used for debugging.
+RTRN    : //
+PARM    : volatile masterList*
+*/
 void displayMasterList( volatile masterList* list )
 {
     for(int i = 0; i < MAX_CLIENTS; i++)
