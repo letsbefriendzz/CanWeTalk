@@ -14,14 +14,13 @@
 
 #define NAME "CLIENT"
 
-char buffer[BUFSIZ];
-
 void* listen_thread(void* s);
 
 int main(int argc, char* argv[])
 {
     ///////////////////////////////////////////////////////////////////
 
+    char buffer[BUFSIZ];
     int                 server_socket, len, done;
     struct sockaddr_in  server_addr;
     struct hostent*     host;
@@ -99,33 +98,29 @@ int main(int argc, char* argv[])
     done = 1;
     while(done == 1)
     {
-        /* clear out the contents of buffer (if any) */
+        // reset buffer to nill
         memset(buffer,0,BUFSIZ);
 
-        /*
-        * now that we have a connection, get a commandline from
-        * the user, and fire it off to the server */
-        //printf ("[%s] >>> ", userName);
+        // flush the toilet
         fflush (stdout);
+
+        // get input from the user
         fgets (buffer, sizeof (buffer), stdin);
         char message[BUFSIZ];
 
+        // strip a newline from the input, if it is present
         if (buffer[strlen (buffer) - 1] == '\n')
             buffer[strlen (buffer) - 1] = '\0';
 
+        // format the message -- ONLY the username, msg and time()
         sprintf(message, "[%s]|>>|%s|(HH:MM:SS)", userName, buffer);
 
-        /* check if the user wants to quit */
+        // if the user inputs >>bye<<, we can set the done flag to 0
         if(strcmp(buffer,">>bye<<") == 0)
-        {
-            // send the command to the SERVER
-            write (server_socket, message, strlen (message));
             done = 0;
-        }
-        else
-        {
-            write (server_socket, message, strlen (message));
-        }
+
+        // done or not, we write to the server
+        write (server_socket, message, strlen (message));
     }
 
     #pragma endregion
@@ -151,7 +146,7 @@ void* listen_thread(void* s)
     char b[BUFSIZ];
     while( 1 )
     {
-        // clear out and get the next command and process
+        // our local buffer, just in case
         memset(b,0,BUFSIZ);
         int numBytesRead = read (server_socket, b, sizeof(b));
 
