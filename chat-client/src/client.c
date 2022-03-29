@@ -86,6 +86,8 @@ int main(int argc, char* argv[])
     #pragma endregion
 
     window_loop(server_socket, userName);
+    close(server_socket);
+    logger(NAME, "QUITTING...");
     return -1;
 
     ///////////////////////////////////////////////////////////////////
@@ -139,9 +141,6 @@ int main(int argc, char* argv[])
     }
 
     #pragma endregion
-
-    close(server_socket);
-    logger(NAME, "QUITTING...");
 }
 
 

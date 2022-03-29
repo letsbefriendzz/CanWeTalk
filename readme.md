@@ -2,7 +2,9 @@
 
 ## TODO - Mar29, 2022
 
-- [ ] Non-blocking receive function on server side
+- [ ] 80-40 char limit messages; how to deal with them?
+
+- [ ] Try and get rid of dynamic memory, server shits itself every so often
 
 ## Overall Requirements
 

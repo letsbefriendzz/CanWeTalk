@@ -219,7 +219,8 @@ void* handleClient(void* clientData)
 //free() THIS FUNCTION'S RETURN VALUE
 char* stripMessage( char* msg)
 {
-    char* ss = subString( msg, getIndexOf(msg, '|', 1), getIndexOf(msg, '|', 2) );
+    char* ss = NULL;
+    ss = subString( msg, getIndexOf(msg, '|', 1), getIndexOf(msg, '|', 2) );
     // LMAO THIS IS SO BoTCHED BUT IT WORKS
     replace(ss, ' ',  '\0');
     return ss;

@@ -56,7 +56,8 @@ char* subString(char* str, int s, int e)
 
 void replace(char* str, char o, char r)
 {
-    int len = strlen(str);
+    int len = 0;
+    len = strlen(str);
     for(int i = 0; i < len; i++)
         if(str[i] == o) str[i] = r;
 }
