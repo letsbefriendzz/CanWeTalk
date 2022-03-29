@@ -64,10 +64,7 @@ int main(int argc, char* argv[])
     memcpy (&server_addr.sin_addr, host->h_addr, host->h_length); // copy the host's internal IP addr into the server_addr struct
     server_addr.sin_port = htons (PORT);
 
-    /*
-    * get a socket for communications
-    */
-    logger (NAME, "Getting STREAM Socket to talk to SERVER");
+    // get a stream socket for server communication
     fflush(stdout);
     if ((server_socket = socket (AF_INET, SOCK_STREAM, 0)) < 0) 
     {
@@ -75,10 +72,7 @@ int main(int argc, char* argv[])
         return 3;
     }
 
-    /*
-    * attempt a connection to server
-    */
-    logger (NAME, "Connecting to SERVER");
+    // attempt a connection
     fflush(stdout);
     if (connect (server_socket, (struct sockaddr *)&server_addr,sizeof (server_addr)) < 0) 
     {
@@ -88,6 +82,8 @@ int main(int argc, char* argv[])
     }
 
     #pragma endregion
+
+
 
     #pragma region creating listener thread
 

@@ -32,8 +32,6 @@ int window_loop(int socket)
 {
   int msgs_sent = 0;
   pthread_t listener;
-  sleep(1);
-  //return -1;
   // so from about here
 
   WINDOW *chat_win;

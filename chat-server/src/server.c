@@ -109,8 +109,12 @@ int main()
         displayMasterList();
         printf("THREADS RUNNING:\t%d\n", activeThreads);
 
+        char ipbuffer[128];
+        inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
+        printf("IP BUFFER:\t%s\n", ipbuffer);
+
     } while( activeThreads > 0 );
-    
+
     #pragma endregion
 
     printf("%d\n", activeThreads);

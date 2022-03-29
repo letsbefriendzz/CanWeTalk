@@ -38,7 +38,7 @@ int getIndexOf(const char* str, char c, int ins)
     return -2;
 }
 
-const char* subString(const char* str, int s, int e)
+char* subString(const char* str, int s, int e)
 {
     if(( e-s ) < 1 || s < 0 || e > strlen(str) || strlen(str) < 1)
         return NULL;

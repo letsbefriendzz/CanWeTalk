@@ -1,5 +1,11 @@
 # Can We Talk? - Systems Programming, Assignment 4
 
+## TODO - Mar29, 2022
+
+- [ ] Non-blocking receive function on server side
+
+- [ ] Get IP address from socket integer
+
 ## Overall Requirements
 
 - [ ] The *Can We Talk* system is comprised of two applications;
