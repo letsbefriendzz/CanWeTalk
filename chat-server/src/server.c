@@ -23,8 +23,6 @@ static volatile int activeThreads = 0;
 void* handleClient( void* clientSocket );
 void cleanup( int server_sock );
 void displayMasterList();
-int removeFromMasterList( int index );
-void initMasterList();
 int broadcastMessage(int socket, const char* msg);
 char* stripMessage(char* msg);
 
@@ -38,7 +36,7 @@ int main()
 
     #pragma region init server
 
-    initMasterList();
+    initMasterList( &ml );
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         logger(NAME, "Failed to create socket");
@@ -135,40 +133,6 @@ void displayMasterList()
     printf("==============================\n");
 }
 
-/*
-Removes and flattens the masterList given an index to delete.
-*/
-int removeFromMasterList( int index )
-{
-    if ( index + 1 == activeThreads )
-    {
-        ml.clients[index].ip   = 0;
-        ml.clients[index].name = NULL;
-    }
-    else
-    {
-        for(int i = index; i < activeThreads; i++)
-        {
-            ml.clients[i].ip    = ml.clients[i+1].ip;
-            ml.clients[i].name  = ml.clients[i+1].name;
-        }
-    }
-    return 0;
-}
-
-/*
-Sets all values of the global masterList instance to empty values.
-*/
-void initMasterList()
-{
-    logger(NAME, "initMasterList() called");
-    for(int i = 0; i < MAX_CLIENTS; i++)
-    {
-        ml.clients[i].ip   = -1;
-        ml.clients[i].name = NULL;
-    }
-}
-
 void* handleClient(void* clientData)
 {
     char buffer[BUFSIZ];
@@ -176,7 +140,9 @@ void* handleClient(void* clientData)
     //int client_sock = *((int*)clientSocket);
     listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
     int threadIndex = activeThreads;
+    
     activeThreads++;
+    ml.activeClients++;
 
     while( 1 )
     {
@@ -200,9 +166,8 @@ void* handleClient(void* clientData)
                 broadcastMessage(ml.clients[i].ip, message);
         }
     }
-
-    close(ltp.client_sock);
-    removeFromMasterList(threadIndex);
+    removeFromMasterList( &ml, threadIndex );
+    ml.activeClients--;
     activeThreads--;
     pthread_exit( (void *) (0) );
 }

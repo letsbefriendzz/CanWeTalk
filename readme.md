@@ -4,8 +4,6 @@
 
 - [ ] Non-blocking receive function on server side
 
-- [ ] Get IP address from socket integer
-
 ## Overall Requirements
 
 - [ ] The *Can We Talk* system is comprised of two applications;
