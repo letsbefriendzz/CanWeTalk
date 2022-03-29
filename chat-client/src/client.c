@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
         if (buffer[strlen (buffer) - 1] == '\n')
             buffer[strlen (buffer) - 1] = '\0';
 
-        sprintf(message, "[%5s]|>>|%s|(HH:MM:SS)", userName, buffer);
+        sprintf(message, "[%s]|>>|%s|(HH:MM:SS)", userName, buffer);
 
         /* check if the user wants to quit */
         if(strcmp(buffer,">>bye<<") == 0)
