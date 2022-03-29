@@ -92,11 +92,16 @@ int main()
         fflush(stdout);
         logger (NAME, "received a packet from NEW CLIENT");
 
+        #pragma region populate listenThreadParameters instance
+
         char ipbuffer[32];
         inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
         listenThreadParameters ltp;
         strcpy(ltp.ip, ipbuffer);
         ltp.client_sock = client_sock;
+
+        #pragma endregion
+
         if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&ltp))
         {
             logger (NAME, "pthread_create() FAILED\n");
@@ -111,7 +116,7 @@ int main()
         }
 
         displayMasterList();
-        printf("THREADS RUNNING:\t%d\n", activeThreads);
+        printf("THREADS RUNNING:\t%d\n", ml.activeClients);
 
     } while( activeThreads > 0 );
 
@@ -139,7 +144,7 @@ void* handleClient(void* clientData)
     char message[BUFSIZ];
     //int client_sock = *((int*)clientSocket);
     listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
-    int threadIndex = activeThreads;
+    int threadIndex = ml.activeClients;
     
     activeThreads++;
     ml.activeClients++;
@@ -153,13 +158,25 @@ void* handleClient(void* clientData)
         // attempt to read from the socket
         int numBytesRead = read (ltp.client_sock, buffer, BUFSIZ);
         
+        // format the message; we append the IP here
+        // also replace bars with spaces; i pinch the msg from the client
+        // in bars for ease of access.
+        replace(buffer, '|', ' ');
         sprintf (message, "%-15s %s", ltp.ip, buffer);
-        replace(message, '|', ' ');
 
+        // strip the message to the first word, and check if it's >>bye<<;
+        // if it is, we terminate the program.
         char* stripped_message = stripMessage(buffer);
-        if(strcmp(stripped_message, ">>bye<<") == 0) break;
+        if(strcmp(stripped_message, ">>bye<<") == 0)
+        {
+            // free memory
+            free(stripped_message);
+            break;
+        }
+        // still free memory
         free(stripped_message);
 
+        // if we read anything, iterate over master list and broadcast
         if(numBytesRead > 0)
         {
             for(int i = 0; i < activeThreads; i++)
