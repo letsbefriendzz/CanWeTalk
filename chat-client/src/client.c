@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
             buffer[strlen (buffer) - 1] = '\0';
 
         // format the message -- ONLY the username, msg and time()
-        sprintf(message, "[%s]|>>|%s|(HH:MM:SS)", userName, buffer);
+        sprintf(message, "[%-5s]|>>|%-40s|(HH:MM:SS)", userName, buffer);
 
         // if the user inputs >>bye<<, we can set the done flag to 0
         if(strcmp(buffer,">>bye<<") == 0)

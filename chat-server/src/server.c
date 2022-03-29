@@ -186,7 +186,7 @@ void* handleClient(void* clientData)
         char ipbuffer[128];
         inet_ntop(AF_INET, &ltp.client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
         
-        sprintf (message, "%s|%s", ipbuffer, buffer);
+        sprintf (message, "%-15s|%s", ipbuffer, buffer);
 
         char* stripped_message = stripMessage(buffer);
         if(strcmp(stripped_message, ">>bye<<") == 0) break;
@@ -214,7 +214,8 @@ int broadcastMessage(int socket, const char* msg)
 //free() THIS FUNCTION'S RETURN VALUE
 char* stripMessage( char* msg)
 {
-    return subString( msg, getIndexOf(msg, '|', 2), getIndexOf(msg, '|', 3) );
+    char* ss = subString( msg, getIndexOf(msg, '|', 2), getIndexOf(msg, '|', 3) );
+    //replace(ss, ' ', '');
 }
 
 void cleanup(int server_sock)
