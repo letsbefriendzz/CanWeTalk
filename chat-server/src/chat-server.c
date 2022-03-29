@@ -37,3 +37,13 @@ void initMasterList( volatile masterList* list )
         list->clients[i].name = NULL;
     }
 }
+
+void displayMasterList( volatile masterList* list )
+{
+    for(int i = 0; i < MAX_CLIENTS; i++)
+    {
+        printf("[%d] - IP:\t%d\n", i, list->clients[i].ip);
+    }
+
+    printf("==============================\n");
+}

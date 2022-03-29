@@ -22,5 +22,6 @@ typedef struct listenThreadParameters
 
 int removeFromMasterList( volatile masterList* list, int index );
 void initMasterList( volatile masterList* list );
+void displayMasterList( volatile masterList* list );
 
 #endif
