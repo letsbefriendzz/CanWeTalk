@@ -27,19 +27,31 @@ int main(int argc, char* argv[])
     struct hostent*     host;
     pthread_t           listener;
 
+    #pragma region parsing cmd arguments
+
     char* userName;
     char* ip;
 
     if(argc != 3)
     {
-        logger(NAME, "bad args");
+        logger(NAME, "Expects THREE ARGS");
         return -1;
     }
     else
     {
         userName    = argv[1];
         ip          = argv[2];
+
+        if( strlen(userName) > 5 )
+        {
+            logger (NAME, "Username provided is longer than max character length (5)");
+            return -2;
+        }
     }
+
+    #pragma endregion
+
+    #pragma region establishing server connection
 
     if ((host = gethostbyname (ip)) == NULL) 
     {
@@ -75,10 +87,9 @@ int main(int argc, char* argv[])
         return 4;
     }
 
-/*
-    window_loop(server_socket);
-    return -1;
-*/
+    #pragma endregion
+
+    #pragma region creating listener thread
 
     if (pthread_create(  &listener, NULL, listen_thread, (void *)&server_socket))
     {
@@ -86,6 +97,10 @@ int main(int argc, char* argv[])
         fflush(stdout);
         return 5;
     }
+
+    #pragma endregion
+
+    #pragma region main msg writing loop
 
     done = 1;
     while(done == 1)
@@ -118,6 +133,8 @@ int main(int argc, char* argv[])
             write (server_socket, message, strlen (message));
         }
     }
+
+    #pragma endregion
 
     close(server_socket);
     logger(NAME, "QUITTING...");

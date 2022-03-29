@@ -77,6 +77,7 @@ int main()
     #pragma endregion
 
     #pragma region main listening loop
+
     do
     {
         // flush the toilet
@@ -109,6 +110,7 @@ int main()
         printf("THREADS RUNNING:\t%d\n", activeThreads);
 
     } while( activeThreads > 0 );
+    
     #pragma endregion
 
     printf("%d\n", activeThreads);
