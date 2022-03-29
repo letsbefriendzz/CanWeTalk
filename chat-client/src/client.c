@@ -104,9 +104,7 @@ int main(int argc, char* argv[])
         if (buffer[strlen (buffer) - 1] == '\n')
             buffer[strlen (buffer) - 1] = '\0';
 
-        sprintf(message, "xxx.xxx.xxx.xxx [%5s] >> %s (HH:MM:SS)", userName, buffer);
-
-        printf("%s\n\n", message);
+        sprintf(message, "xxx.xxx.xxx.xxx|[%5s]|>>|%s|(HH:MM:SS)", userName, buffer);
 
         /* check if the user wants to quit */
         if(strcmp(buffer,">>bye<<") == 0)
@@ -150,6 +148,7 @@ void* listen_thread(void* s)
 
         if(numBytesRead > 0)
         {
+            replace(b, '|', ' ');
             printf("%s\n", b);
             fflush(stdout);
         }

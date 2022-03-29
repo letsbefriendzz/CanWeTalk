@@ -40,7 +40,7 @@ int getIndexOf(const char* str, char c, int ins)
 
 const char* subString(const char* str, int s, int e)
 {
-    if(( e-s ) < 1 || s < 0 || e > strlen(str))
+    if(( e-s ) < 1 || s < 0 || e > strlen(str) || strlen(str) < 1)
         return NULL;
 
     char* rtrn = malloc(sizeof(char) * ((e-s)) );
@@ -49,4 +49,10 @@ const char* subString(const char* str, int s, int e)
         rtrn[i-(s+1)] = str[i];
     }
     return rtrn;
+}
+
+void replace(char* str, char o, char r)
+{
+    for(int i = 0; i < strlen(str); i++)
+        if(str[i] == o) str[i] = r;
 }
