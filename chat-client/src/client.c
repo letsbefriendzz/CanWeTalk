@@ -1,8 +1,8 @@
 #include "../inc/chat-client.h"
 #include "../../common/inc/common.h"
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
 #include <netdb.h>
 
 #include <stdio.h>

@@ -188,9 +188,9 @@ void* handleClient(void* clientData)
         int numBytesRead = read (ltp.client_sock, buffer, BUFSIZ);
         
         sprintf (message, "%-15s %s", ltp.ip, buffer);
+        replace(message, '|', ' ');
 
         char* stripped_message = stripMessage(buffer);
-        printf("SUBSTR:\t\"%s\"\n\n", stripped_message);
         if(strcmp(stripped_message, ">>bye<<") == 0) break;
         free(stripped_message);
 
@@ -210,7 +210,7 @@ void* handleClient(void* clientData)
 int broadcastMessage(int socket, const char* msg)
 {
     write(socket, msg, strlen(msg));
-    printf("writing to socket %d :\t%s\n", socket, msg);
+    printf("writing to socket %d :\t%s\n\n", socket, msg);
 }
 
 //free() THIS FUNCTION'S RETURN VALUE
