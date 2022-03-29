@@ -93,8 +93,11 @@ int main()
 
         fflush(stdout);
         logger (NAME, "received a packet from NEW CLIENT");
+
+        char ipbuffer[32];
+        inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
         listenThreadParameters ltp;
-        ltp.client_addr = client_addr;
+        strcpy(ltp.ip, ipbuffer);
         ltp.client_sock = client_sock;
         if (pthread_create(  &(threads[(activeThreads-1)])  , NULL , handleClient, (void *)&ltp))
         {
@@ -181,12 +184,10 @@ void* handleClient(void* clientData)
         memset(buffer,0,BUFSIZ);
         memset(message,0,BUFSIZ);
         
+        // attempt to read from the socket
         int numBytesRead = read (ltp.client_sock, buffer, BUFSIZ);
-
-        char ipbuffer[128];
-        inet_ntop(AF_INET, &ltp.client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
         
-        sprintf (message, "%-15s %s", ipbuffer, buffer);
+        sprintf (message, "%-15s %s", ltp.ip, buffer);
 
         char* stripped_message = stripMessage(buffer);
         printf("SUBSTR:\t\"%s\"\n\n", stripped_message);

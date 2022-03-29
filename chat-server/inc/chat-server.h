@@ -2,7 +2,6 @@
 #define CHAT_SERVER_H
 
 #define MAX_CLIENTS 10
-#include <netdb.h>
 
 typedef struct client
 {
@@ -17,8 +16,8 @@ typedef struct masterList
 
 typedef struct listenThreadParameters
 {
-    int                 client_sock;
-    struct sockaddr_in  client_addr;
+    char        ip[32];
+    int         client_sock;
 } listenThreadParameters;
 
 #endif
