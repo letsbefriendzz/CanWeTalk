@@ -150,7 +150,7 @@ int main()
     #pragma endregion
 
     printf("Waiting for clients to close...");
-    sleep(10);
+    //sleep(10);
 
     if(close(server_sock) < 0)
         printf("FAILED TO EXIT\n");
@@ -220,7 +220,7 @@ void* handleClient(void* clientData)
         free(stripped_message);
 
         // Broadcast our message to all clients, if we have any bytes that we read
-        if(numBytesRead > 0)
+        if(numBytesRead > 0 && run == 0)
         {
             for(int i = 0; i < ml.activeClients; i++)
             {
@@ -236,6 +236,7 @@ void* handleClient(void* clientData)
     ml.activeClients--;
     // return 0; not that we're
     printf("Thread responsible for ML %d DONE\n", clientIndex);
+    close(ltp.client_sock);
     pthread_exit( (void *) (0) );
 }
 
