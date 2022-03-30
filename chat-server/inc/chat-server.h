@@ -10,7 +10,7 @@ typedef struct client
 
 typedef struct masterList
 {
-    int activeClients;
+    volatile int activeClients;
     client clients[MAX_CLIENTS];
 } masterList;
 
@@ -18,6 +18,7 @@ typedef struct listenThreadParameters
 {
     char        ip[32];
     int         client_sock;
+    int         index;
 } listenThreadParameters;
 
 int removeFromMasterList( volatile masterList* list, int index );

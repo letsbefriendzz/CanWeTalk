@@ -162,7 +162,7 @@ void* writerThead(void* param)
     sleep(1);
     input_win(p.window, buf);
     replace(buf, '|', ';');
-    if( strlen(buf) < 40 )
+    if( strlen(buf) < 80 )
     {
       char message[BUFSIZ];
 

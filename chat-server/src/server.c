@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include <pthread.h>
+#include <errno.h>
 
 volatile masterList ml;
 
@@ -27,7 +28,6 @@ char* stripMessage(char* msg);
 int main()
 {
     /////////////////////////////////////////////////////////////////
-
     int                 server_sock, client_sock, client_len;
     struct sockaddr_in  client_addr, server_addr;
     pthread_t           threads[MAX_CLIENTS];
@@ -35,6 +35,8 @@ int main()
     #pragma region init server & masterList
 
     initMasterList( &ml );
+    ml.activeClients    = 0;
+
     if((server_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
         logger(NAME, "Failed to create socket");
@@ -82,18 +84,21 @@ int main()
 
     #pragma region main listening loop
 
-    countdown(15);
+    countdown(3);
     do
     {
         // flush the toilet
         fflush(stdout);
         client_len = sizeof (client_addr);
         // if accept() returns < 0, an error has occured
-        if ( ( client_sock = accept (server_sock,(struct sockaddr *)&client_addr, &client_len ) ) < 0)
+        if ( ( client_sock = accept (server_sock,(struct sockaddr *)&client_addr, &client_len ) ) < 0 )
         {
-            //logger(NAME, "accept() call in server failed");
-            // fflush(stdout);	
-            //return -4;
+            if( !(errno == EAGAIN || errno == EWOULDBLOCK) )
+            {
+                logger(NAME, "accept() call in server failed");
+                fflush(stdout);	
+                return -4;
+            }
         }
         else
         {
@@ -113,6 +118,7 @@ int main()
             listenThreadParameters ltp;
             strcpy(ltp.ip, ipbuffer);
             ltp.client_sock = client_sock;
+            ltp.index = ml.activeClients;
 
             #pragma endregion
 
@@ -132,9 +138,9 @@ int main()
                     // otherwise, log that a new thread has been created
                     logger(NAME, "Created new thread");
                     // inform the operating sys that we don't care about the return value of the thread
-                    pthread_detach( threads[ml.activeClients] );
+                    pthread_detach( threads[ ltp.index ] );
                     // copy the ip field to the master list, iterate activeClients counter
-                    ml.clients[ml.activeClients].ip = client_sock;
+                    ml.clients[ ltp.index ].ip = client_sock;
                     ml.activeClients++;
                 }
             }
@@ -150,7 +156,7 @@ int main()
     #pragma endregion
 
     printf("Waiting for clients to close...");
-    //sleep(10);
+    sleep(3);
 
     if(close(server_sock) < 0)
         printf("FAILED TO EXIT\n");
@@ -187,11 +193,12 @@ PARM    : void*
 */
 void* handleClient(void* clientData)
 {
+    ml.activeClients ++;
     char buffer[PACKET_WIDTH];
     char message[BUFSIZ];
     //int client_sock = *((int*)clientSocket);
     listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
-    int clientIndex = ml.activeClients - 1;
+    int clientIndex = ltp.index;
 
     int run = 0;
     while( run == 0 )
@@ -229,14 +236,14 @@ void* handleClient(void* clientData)
             }
         }
     }
+    close(ltp.client_sock);
+    ml.activeClients--;
 
     // when the loop terminates, remove the current instance from our masterList
     removeFromMasterList( &ml, clientIndex );
     // decrement the activeClients member of the masterList
-    ml.activeClients--;
-    // return 0; not that we're
-    printf("Thread responsible for ML %d DONE\n", clientIndex);
-    close(ltp.client_sock);
+    // return 0; not that we're 10.34.161.56
+    printf("Thread responsible for ML %d DONE\nTHREADS: %d\n", clientIndex, ml.activeClients);
     pthread_exit( (void *) (0) );
 }
 
