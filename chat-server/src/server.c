@@ -193,7 +193,6 @@ PARM    : void*
 */
 void* handleClient(void* clientData)
 {
-    ml.activeClients ++;
     char buffer[PACKET_WIDTH];
     char message[BUFSIZ];
     //int client_sock = *((int*)clientSocket);

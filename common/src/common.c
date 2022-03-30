@@ -9,7 +9,7 @@ void helloWorld()
 
 void logger(const char* user, const char* msg)
 {
-    printf("[%s] : %s\n", user, msg);
+    //printf("[%s] : %s\n", user, msg);
 }
 
 int occursIn(const char* str, char c)
