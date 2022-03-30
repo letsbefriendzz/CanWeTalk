@@ -1,3 +1,6 @@
+#define __REENTRANT
+#define NAME "SERVER"
+
 #include "../../common/inc/common.h"
 #include "../inc/chat-server.h"
 
@@ -15,8 +18,6 @@
 #include <string.h>
 
 #include <pthread.h>
-
-#define NAME "SERVER"
 
 volatile masterList ml;
 
@@ -83,7 +84,6 @@ int main()
     #pragma region main listening loop
 
     countdown(15);
-
     do
     {
         // flush the toilet
@@ -111,7 +111,8 @@ int main()
 
             #pragma endregion
 
-            if (pthread_create(  &(threads[(ml.activeClients-1)])  , NULL , handleClient, (void *)&ltp))
+            //printf("%d\n", ml.activeClients-1);
+            if (pthread_create(  &(threads[(ml.activeClients)])  , NULL , handleClient, (void *)&ltp))
             {
                 logger (NAME, "pthread_create() FAILED\n");
                 fflush(stdout);
@@ -121,6 +122,7 @@ int main()
             {
                 logger(NAME, "Created new thread");
                 ml.clients[ml.activeClients].ip = client_sock;
+                ml.activeClients++;
             }
 
             displayMasterList( &ml );
@@ -132,7 +134,7 @@ int main()
     #pragma endregion
 
     cleanup(server_sock);
-
+    printf("EXITING\n");
     return 0;
 }
 
@@ -168,9 +170,7 @@ void* handleClient(void* clientData)
     char message[BUFSIZ];
     //int client_sock = *((int*)clientSocket);
     listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
-    int clientIndex = ml.activeClients;
-    
-    ml.activeClients++;
+    int clientIndex = ml.activeClients - 1;
 
     while( 1 )
     {
@@ -200,6 +200,7 @@ void* handleClient(void* clientData)
         // Broadcast our message to all clients, if we have any bytes that we read
         if(numBytesRead > 0)
         {
+            printf("THREADS ACTIVE:%d\n", ml.activeClients);
             for(int i = 0; i < ml.activeClients; i++)
             {
                 write(ml.clients[i].ip, message, strlen(message));

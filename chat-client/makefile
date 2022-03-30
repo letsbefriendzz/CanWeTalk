@@ -7,7 +7,7 @@
 #
 # FINAL BINARY Target
 ./bin/chatClient : ./obj/client.o ./obj/chatClient.o ../common/obj/common.o
-	cc ./obj/client.o ./obj/chatClient.o ../common/obj/common.o  -lpthread -lncurses -o ./bin/chatClient
+	cc ./obj/client.o ./obj/chatClient.o ../common/obj/common.o -lpthread -lncurses -o ./bin/chatClient
 #
 # =======================================================
 #                     Dependencies

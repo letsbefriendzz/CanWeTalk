@@ -1,3 +1,4 @@
+#define __REENTRANT
 #include "../inc/chat-client.h"
 #include "../../common/inc/common.h"
 

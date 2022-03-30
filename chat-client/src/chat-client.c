@@ -6,6 +6,8 @@
 		Sam Hsu (11/17/10)
 */ // bruh i'm literally gonna clone this code and not understand a bit of it
 
+#define __REENTRANT
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -77,6 +79,7 @@ int window_loop(int server_socket, const char* userName)
   threadParameters w;
   w.socket    = server_socket;
   w.window    = chat_win;
+  pthread_detach(thread);
   w.userName  = userName;
   if (pthread_create( &thread, NULL , writerThead, (void *)&w))
   {
@@ -93,7 +96,7 @@ int window_loop(int server_socket, const char* userName)
 
   /* tell the user that the 5 messages are done ... */
   shouldBlank = 1;
-  sprintf(buf,"Messaging is complete ... destroying window in 5 seconds");
+  sprintf(buf,"Messaging is complete!");
   display_win(msg_win, buf, 0, shouldBlank);
 
   sleep(1);

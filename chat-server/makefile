@@ -7,7 +7,7 @@
 #
 # FINAL BINARY Target
 ./bin/chatServer : ./obj/server.o ./obj/chatServer.o ../common/obj/common.o
-	cc ./obj/server.o ./obj/chatServer.o ../common/obj/common.o -o ./bin/chatServer -lpthread
+	cc ./obj/server.o ./obj/chatServer.o ../common/obj/common.o -lpthread -o ./bin/chatServer
 #
 # =======================================================
 #                     Dependencies
