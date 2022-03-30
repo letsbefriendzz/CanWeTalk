@@ -22,7 +22,6 @@
 volatile masterList ml;
 
 void* handleClient( void* clientSocket );
-void cleanup( int server_sock );
 char* stripMessage(char* msg);
 
 int main()
@@ -56,7 +55,7 @@ int main()
     {
         // log a fail
         logger (NAME, "bind() call in server failed");
-        cleanup(server_sock);
+        close(server_sock);
         return -2;
     } // log a success
     logger (NAME, "bind() call in server succesful");
@@ -66,7 +65,7 @@ int main()
     {
         // log a fail
         logger (NAME, "listen() call in server failed");
-        cleanup(server_sock);
+        close(server_sock);
         return -3;
     }// log a success
     logger (NAME, "listen() call in server successful");
@@ -75,7 +74,7 @@ int main()
     if( fcntl(server_sock, F_SETFL, fcntl(server_sock, F_GETFL, 0) | O_NONBLOCK) < 0 )
     {
         logger (NAME, "attempt to make socket nonblocking failed");
-        cleanup(server_sock);
+        close(server_sock);
         return -4;
     }
 
@@ -121,6 +120,7 @@ int main()
             else
             {
                 logger(NAME, "Created new thread");
+                pthread_detach( threads[ml.activeClients] );
                 ml.clients[ml.activeClients].ip = client_sock;
                 ml.activeClients++;
             }
@@ -133,8 +133,10 @@ int main()
 
     #pragma endregion
 
-    cleanup(server_sock);
-    printf("EXITING\n");
+    if(close(server_sock) < 0)
+        printf("FAILED TO EXIT\n");
+    else
+        printf("EXITED SUCCESSFULLY\n");
     return 0;
 }
 
@@ -225,9 +227,4 @@ char* stripMessage( char* msg)
     // LMAO THIS IS SO BoTCHED BUT IT WORKS
     replace(ss, ' ',  '\0');
     return ss;
-}
-
-void cleanup(int server_sock)
-{
-    close(server_sock);
 }

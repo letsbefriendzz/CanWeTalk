@@ -87,8 +87,10 @@ int main(int argc, char* argv[])
     #pragma endregion
 
     window_loop(server_socket, userName);
-    close(server_socket);
-    logger(NAME, "QUITTING...");
+    if( close(server_socket) < 0)
+        logger(NAME, "SOCKET CLOSE FAIL");
+    else
+        logger(NAME, "QUITTING...");
     return -1;
 
     ///////////////////////////////////////////////////////////////////

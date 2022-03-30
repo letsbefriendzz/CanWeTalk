@@ -104,6 +104,9 @@ int window_loop(int server_socket, const char* userName)
   destroy_win(chat_win);
   destroy_win(msg_win);
   endwin();
+
+  sleep(1);
+  printf("COMPLETE\n");
 }
      
 WINDOW *create_newwin(int height, int width, int starty, int startx)
