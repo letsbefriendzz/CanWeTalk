@@ -97,41 +97,60 @@ int main()
         }
         else
         {
+            // flush stdout
             fflush(stdout);
+            // log that we've received a new client packet
             logger (NAME, "received a packet from NEW CLIENT");
 
             #pragma region populate listenThreadParameters instance
             
+            // create a buffer to store the ip address of this client
             char ipbuffer[32];
+            // call inet_ntop to get ip
             inet_ntop(AF_INET, &client_addr.sin_addr, ipbuffer, sizeof(ipbuffer));
+            // create ltp, populate the ip and client socket members
+
             listenThreadParameters ltp;
             strcpy(ltp.ip, ipbuffer);
             ltp.client_sock = client_sock;
 
             #pragma endregion
 
-            //printf("%d\n", ml.activeClients-1);
-            if (pthread_create(  &(threads[(ml.activeClients)])  , NULL , handleClient, (void *)&ltp))
+            // if we have space for a new thread
+            if(ml.activeClients <= 10)
             {
-                logger (NAME, "pthread_create() FAILED\n");
-                fflush(stdout);
-                return 5;
-            }
-            else
-            {
-                logger(NAME, "Created new thread");
-                pthread_detach( threads[ml.activeClients] );
-                ml.clients[ml.activeClients].ip = client_sock;
-                ml.activeClients++;
+                // try and open one
+                if (pthread_create(  &(threads[(ml.activeClients)])  , NULL , handleClient, (void *)&ltp))
+                {
+                    // log a failure and flush stdout, should it fail
+                    logger (NAME, "pthread_create() FAILED\n");
+                    fflush(stdout);
+                    return 5;
+                }
+                else
+                {
+                    // otherwise, log that a new thread has been created
+                    logger(NAME, "Created new thread");
+                    // inform the operating sys that we don't care about the return value of the thread
+                    pthread_detach( threads[ml.activeClients] );
+                    // copy the ip field to the master list, iterate activeClients counter
+                    ml.clients[ml.activeClients].ip = client_sock;
+                    ml.activeClients++;
+                }
             }
 
+            // dump the ml contents for debugging
             displayMasterList( &ml );
             printf("THREADS RUNNING:\t%d\n", ml.activeClients);
+            // LEAVE THE SLEEP CALL
             sleep(1);
         }
     } while( ml.activeClients > 0 );
 
     #pragma endregion
+
+    printf("Waiting for clients to close...");
+    sleep(10);
 
     if(close(server_sock) < 0)
         printf("FAILED TO EXIT\n");
@@ -174,7 +193,8 @@ void* handleClient(void* clientData)
     listenThreadParameters ltp = *( (listenThreadParameters*)clientData );
     int clientIndex = ml.activeClients - 1;
 
-    while( 1 )
+    int run = 0;
+    while( run == 0 )
     {
         // clear out and get the next command and process
         memset(buffer,0,PACKET_WIDTH);
@@ -194,19 +214,18 @@ void* handleClient(void* clientData)
         char* stripped_message = stripMessage(buffer);
         if(strcmp(stripped_message, ">>bye<<") == 0)
         {
-            free(stripped_message);
-            break;
+            printf("DETECTED >>bye<<\n");
+            run = 1;
         }
         free(stripped_message);
 
         // Broadcast our message to all clients, if we have any bytes that we read
         if(numBytesRead > 0)
         {
-            printf("THREADS ACTIVE:%d\n", ml.activeClients);
             for(int i = 0; i < ml.activeClients; i++)
             {
                 write(ml.clients[i].ip, message, strlen(message));
-                printf("writing to socket %d :\t%s\n\n", ml.clients[i].ip, message);
+                printf("writing to socket %d :\t%s\n", ml.clients[i].ip, message);
             }
         }
     }
@@ -216,6 +235,7 @@ void* handleClient(void* clientData)
     // decrement the activeClients member of the masterList
     ml.activeClients--;
     // return 0; not that we're
+    printf("Thread responsible for ML %d DONE\n", clientIndex);
     pthread_exit( (void *) (0) );
 }
 

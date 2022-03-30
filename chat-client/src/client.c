@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
 {
     ///////////////////////////////////////////////////////////////////
 
-    char buffer[40];
+    char buffer[80];
     int                 server_socket, len, done;
     struct sockaddr_in  server_addr;
     struct hostent*     host;

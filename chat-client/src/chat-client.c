@@ -27,7 +27,6 @@ static int exec = 0;
 
 void listenerThread(void* param);
 void* writerThead(void* param);
-void flush();
 ////////////////////////////////////////////     
 WINDOW *create_newwin(int, int, int, int);
 void destroy_win(WINDOW *);
@@ -45,6 +44,8 @@ void appendToWindow( WINDOW* win, char* word, int shouldBlank )
 int window_loop(int server_socket, const char* userName)
 {
   pthread_t thread;
+
+  #pragma region window setup
   WINDOW *chat_win, *msg_win;
   int chat_startx, chat_starty, chat_width, chat_height;
   int msg_startx, msg_starty, msg_width, msg_height, i;
@@ -76,39 +77,117 @@ int window_loop(int server_socket, const char* userName)
   chat_win = create_newwin(chat_height, chat_width, chat_starty, chat_startx);
   scrollok(chat_win, TRUE);
 
+  #pragma endregion
+
+  // setup threadParameters for the writing thread
   threadParameters w;
+  // copy server_socket value
   w.socket    = server_socket;
+  // point to the correct window
   w.window    = chat_win;
-  pthread_detach(thread);
+  // copy the local username
   w.userName  = userName;
+  // inform the compiler that we don't care about the return value of this thread
+  //pthread_detach(thread);
+  // aaaaaaand attempt to make the thread
   if (pthread_create( &thread, NULL , writerThead, (void *)&w))
   {
     fflush(stdout);
     return 5;
   }
 
-  /* allow the user to input 5 messages for display */ 
+  // create threadParameters for the listener thread
+  // which is actually the main thread; i'm just acting like
+  // it's another thread because I've bounced between which
+  // task should be on the main thread and which should be on its own.
   threadParameters l;
+  // copy the server socket
   l.socket    = server_socket;
+  // point to the message window
   l.window    = msg_win;
+  // set username to null, because we don't need it here
   l.userName  = NULL;
+  // call the listenerThread function with the above parameter
   listenerThread( (void*)&l );
 
-  /* tell the user that the 5 messages are done ... */
-  shouldBlank = 1;
-  sprintf(buf,"Messaging is complete!");
-  display_win(msg_win, buf, 0, shouldBlank);
+  void** status;
+  pthread_join( thread, status );
 
-  sleep(1);
-     
+  // once the listenerThread 
+  shouldBlank = 1;
+  sprintf(buf,"Messaging is complete! Terminating in 3 seconds...");
+  display_win(msg_win, buf, 0, shouldBlank);
+  sleep(3);
+  
+  #pragma region window teardown
   destroy_win(chat_win);
   destroy_win(msg_win);
   endwin();
+  #pragma endregion
 
-  sleep(1);
   printf("COMPLETE\n");
 }
-     
+
+void listenerThread(void* param)
+{
+  threadParameters lp = *((threadParameters*)param);
+  char b[PACKET_WIDTH + 1];
+
+  while( exec == 0 )
+  {
+      // our local buffer, just in case
+      memset(b,0,PACKET_WIDTH);
+      int numBytesRead = read (lp.socket, b, sizeof(b));
+
+      if( numBytesRead > 0 )
+      {
+        b[78] = '\0';
+        appendToWindow( lp.window, b, 0 );
+      }
+    sleep(1);
+  }
+  printf("fin\n");
+  return;
+}
+
+void* writerThead(void* param)
+{
+  threadParameters p = *((threadParameters*)param);
+  char buf[MAX_MSG];
+  while(exec == 0)
+  {
+    // reset buffer to nill
+    memset(buf,0,MAX_MSG);
+    // get input from the user
+    sleep(1);
+    input_win(p.window, buf);
+    replace(buf, '|', ';');
+    if( strlen(buf) < 40 )
+    {
+      char message[BUFSIZ];
+
+      // strip a newline from the input, if it is present
+      if (buf[strlen (buf) - 1] == '\n')
+        buf[strlen (buf) - 1] = '\0';
+
+      // format the message -- ONLY the username, msg and time()
+      sprintf(message, "[%-5s] >>|%-40s|(HH:MM:SS)", p.userName, buf);
+
+      // if the user inputs >>bye<<, we can set the done flag to 0
+      if(strcmp(buf,">>bye<<") == 0)
+        exec = 1;
+
+      // done or not, we write to the server
+      write (p.socket, message, strlen (message));
+    }
+  }
+
+  appendToWindow( p.window, "exiting...", 0 );
+  pthread_exit((void*) 0);
+}
+
+#pragma region window functions
+
 WINDOW *create_newwin(int height, int width, int starty, int startx)
 {
   WINDOW *local_win;
@@ -189,66 +268,4 @@ void blankWin(WINDOW *win)
   wrefresh(win);
 }  /* blankWin */
 
-void listenerThread(void* param)
-{
-  threadParameters lp = *((threadParameters*)param);
-  char b[PACKET_WIDTH + 1];
-
-  while( exec == 0 )
-  {
-      // our local buffer, just in case
-      memset(b,0,PACKET_WIDTH);
-      int numBytesRead = read (lp.socket, b, sizeof(b));
-
-      if( numBytesRead > 0 )
-      {
-        b[78] = '\0';
-        appendToWindow( lp.window, b, 0 );
-      }
-    sleep(1);
-  }
-  printf("fin\n");
-  return;
-}
-
-void* writerThead(void* param)
-{
-  threadParameters p = *((threadParameters*)param);
-  char buf[MAX_MSG];
-  while(exec == 0)
-  {
-    // reset buffer to nill
-    memset(buf,0,MAX_MSG);
-    // get input from the user
-    sleep(1);
-    input_win(p.window, buf);
-    replace(buf, '|', ';');
-    if( strlen(buf) < 40 )
-    {
-      char message[BUFSIZ];
-
-      // strip a newline from the input, if it is present
-      if (buf[strlen (buf) - 1] == '\n')
-        buf[strlen (buf) - 1] = '\0';
-
-      // format the message -- ONLY the username, msg and time()
-      sprintf(message, "[%-5s] >>|%-40s|(HH:MM:SS)", p.userName, buf);
-
-      // if the user inputs >>bye<<, we can set the done flag to 0
-      if(strcmp(buf,">>bye<<") == 0)
-        exec = 1;
-
-      // done or not, we write to the server
-      write (p.socket, message, strlen (message));
-    }
-  }
-
-  appendToWindow( p.window, "exiting...", 0 );
-  pthread_exit((void*) 0);
-}
-
-void flush()
-{
-  fflush(stdout);
-  fflush(stdin);
-}
+#pragma endregion
