@@ -209,12 +209,9 @@ void* handleClient(void* clientData)
         
         // attempt to read from the socket
         int numBytesRead = read (ltp.client_sock, buffer, BUFSIZ);
-        
-        // format the message with 15 characters dedicated for the ltp.ip field
-        // then poop the remaining buffer out after it.
-        sprintf (message, "%-15s %s", ltp.ip, buffer);
-        // replace the bars with spaces because standards
-        replace(message, '|', ' ');
+
+        if(numBytesRead == -1)
+            run = 1;
 
         // strip the message and check if the first word in it is >>bye<<
         // if it is, we terminate execution.
@@ -229,6 +226,12 @@ void* handleClient(void* clientData)
         // Broadcast our message to all clients, if we have any bytes that we read
         if(numBytesRead > 0 && run == 0)
         {
+            // format the message with 15 characters dedicated for the ltp.ip field
+            // then poop the remaining buffer out after it.
+            sprintf (message, "%-15s %s", ltp.ip, buffer);
+            // replace the bars with spaces because standards
+            replace(message, '|', ' ');
+
             for(int i = 0; i < ml.activeClients; i++)
             {
                 write(ml.clients[i].ip, message, strlen(message));

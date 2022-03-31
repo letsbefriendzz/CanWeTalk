@@ -13,10 +13,10 @@
 #                     Dependencies
 # =======================================================   
 ./obj/client.o : ./src/client.c
-	cc -c -g ./src/client.c -o ./obj/client.o
+	cc -c -ggdb ./src/client.c -o ./obj/client.o
 
 ./obj/chatClient.o : ./src/chat-client.c
-	cc -c -g ./src/chat-client.c -o ./obj/chatClient.o
+	cc -c -ggdb ./src/chat-client.c -o ./obj/chatClient.o
 
 ../common/obj/common.o : ../common/src/common.c
-	cc -c -g ../common/src/common.c -o ../common/obj/common.o
+	cc -c -ggdb ../common/src/common.c -o ../common/obj/common.o

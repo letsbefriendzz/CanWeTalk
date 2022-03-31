@@ -170,8 +170,12 @@ void* writerThead(void* param)
       if (buf[strlen (buf) - 1] == '\n')
         buf[strlen (buf) - 1] = '\0';
 
+      // get time
+      time_t s = time(0);
+      struct tm* local = localtime(&s);
+
       // format the message -- ONLY the username, msg and time()
-      sprintf(message, "[%-5s] >>|%-40s|(HH:MM:SS)", p.userName, buf);
+      sprintf(message, "[%-5s] >>|%-40s|(%02d:%02d:%02d)", p.userName, buf, local->tm_hour, local->tm_min, local->tm_sec);
 
       // if the user inputs >>bye<<, we can set the done flag to 0
       if(strcmp(buf,">>bye<<") == 0)
