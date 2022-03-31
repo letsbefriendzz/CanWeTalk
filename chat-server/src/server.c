@@ -56,6 +56,7 @@ int main()
     if (bind (server_sock, (struct sockaddr *)&server_addr, sizeof (server_addr)) < 0) 
     {
         // log a fail
+        printf("errno:\t%d\n", errno);
         logger (NAME, "bind() call in server failed");
         close(server_sock);
         return -2;
@@ -126,7 +127,7 @@ int main()
             if(ml.activeClients <= 10)
             {
                 // try and open one
-                if (pthread_create(  &(threads[(ml.activeClients)])  , NULL , handleClient, (void *)&ltp))
+                if (pthread_create(  &(threads[ltp.index])  , NULL , handleClient, (void *)&ltp))
                 {
                     // log a failure and flush stdout, should it fail
                     logger (NAME, "pthread_create() FAILED\n");
