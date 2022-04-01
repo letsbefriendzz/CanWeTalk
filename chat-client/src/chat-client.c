@@ -3,6 +3,8 @@ NAME        :
 PROJECT     : Can We Talk
 AUTHOR      : Ryan Enns
 DESC        :
+  chat-client.c defines the bulk of the logic for the chat client program.
+  I copied most of the code from the ncurses chat example.
 */
 
 /* splitWin.c is a simple example to show how to deal with split screens.
@@ -135,6 +137,22 @@ int window_loop(int server_socket, const char* userName)
   printf("COMPLETE\n");
 }
 
+/*
+NAME  : listenerThread
+DESC  :
+  Initially, the reading of messages from the server and writing them to the
+  screen was going to be the job of a second thread. However, ncurses, being
+  the buggy library that it is, didn't like this at all. So that's why this
+  function still looks like it could be used as a thread. It could be. Just
+  add an asterisk.
+
+  listenerThread takes a threadParameters object as a void*, and reads any
+  information it receives from the server socket. It then appends the received
+  message to the chat window. It is always checking for the static int exec
+  to continue its while loop. Once that flag has been set, it terminates.
+RTRN  
+PARM
+*/
 void listenerThread(void* param)
 {
   threadParameters lp = *((threadParameters*)param);
@@ -157,6 +175,15 @@ void listenerThread(void* param)
   return;
 }
 
+/*
+NAME  : writerThread
+DESC  :
+  The writerThread is ran as a pthread instance, and is responsible for accepting
+  user input and sending it the server. It takes a threadParameters object as a
+  void*, and continues accepting input and sending it until the usr enters >>bye<<.
+RTRN  : void*
+PARM  : void *(threadParmaeters)
+*/
 void* writerThead(void* param)
 {
   threadParameters p = *((threadParameters*)param);
@@ -197,6 +224,7 @@ void* writerThead(void* param)
   pthread_exit((void*) 0);
 }
 
+// ncurses functions that i did not write
 #pragma region window functions
 
 WINDOW *create_newwin(int height, int width, int starty, int startx)

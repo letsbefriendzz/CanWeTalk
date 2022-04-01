@@ -1,8 +1,10 @@
 /*
-NAME        :
+NAME        : client.c
 PROJECT     : Can We Talk
 AUTHOR      : Ryan Enns
 DESC        :
+    client.c defines the main function for the chat client program. It is primarily responsible
+    for establishing a connection to the server, where it then passes control to widow_loop().
 */
 
 #define __REENTRANT
@@ -21,8 +23,6 @@ DESC        :
 #include <pthread.h>
 
 #define NAME "CLIENT"
-
-void* listen_thread(void* s);
 
 int main(int argc, char* argv[])
 {
@@ -101,86 +101,4 @@ int main(int argc, char* argv[])
     return -1;
 
     ///////////////////////////////////////////////////////////////////
-
-    #pragma region creating listener thread
-
-    if (pthread_create(  &listener, NULL, listen_thread, (void *)&server_socket))
-    {
-        logger (NAME, "pthread_create() FAILED\n");
-        fflush(stdout);
-        return 5;
-    }
-
-    #pragma endregion
-
-    #pragma region main msg writing loop
-
-    done = 1;
-    while(done == 1)
-    {
-        // reset buffer to nill
-        memset(buffer,0,MAX_MSG);
-
-        // flush the toilet
-        fflush (stdout);
-
-        // get input from the user
-        fgets (buffer, sizeof (buffer), stdin);
-        replace(buffer, '|', ';');
-
-        if(strlen(buffer) < 40)
-        {
-            char message[BUFSIZ];
-
-            // strip a newline from the input, if it is present
-            if (buffer[strlen (buffer) - 1] == '\n')
-                buffer[strlen (buffer) - 1] = '\0';
-
-            // format the message -- ONLY the username, msg and time()
-            sprintf(message, "[%-5s] >>|%-40s|(HH:MM:SS)", userName, buffer);
-
-            // if the user inputs >>bye<<, we can set the done flag to 0
-            if(strcmp(buffer,">>bye<<") == 0)
-                done = 0;
-
-            // done or not, we write to the server
-            write (server_socket, message, strlen (message));
-        }
-        else
-            printf("LONG STRING MEME\n\n");
-    }
-
-    #pragma endregion
-}
-
-
-// i become nothing more than a robot when i write code like this
-// i never knew flow until i started programming
-/*
-NAME    : listen_thread
-DESC    :
-    The function called by our client thread; responsible for listening for
-    incoming messages from the server and writing them to the screen.
-RTRN    : void*
-PARM    : void*
-*/
-void* listen_thread(void* s)
-{
-    int server_socket = *(int*)s;
-    char b[BUFSIZ];
-    while( 1 )
-    {
-        // our local buffer, just in case
-        memset(b,0,BUFSIZ);
-        int numBytesRead = read (server_socket, b, sizeof(b));
-
-        if(strcmp(b, ">>bye<<") == 0) break;
-
-        if(numBytesRead > 0)
-        {
-            printf("%s\n", b);
-            fflush(stdout);
-        }
-    }
-    pthread_exit((void*) 0);
 }
