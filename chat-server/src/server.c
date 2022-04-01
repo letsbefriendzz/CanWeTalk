@@ -1,8 +1,11 @@
 /*
-NAME        :
+NAME        : server.c
 PROJECT     : Can We Talk
 AUTHOR      : Ryan Enns
 DESC        :
+    server.c defines the main function for the chat server application. It opens
+    a socket to listen on, and for each new client is recieves, opens a thread to
+    handle the reading from it and writing messages to other clients.
 */
 
 #define __REENTRANT
@@ -257,8 +260,15 @@ void* handleClient(void* clientData)
     pthread_exit( (void *) (0) );
 }
 
-//free() THIS FUNCTION'S RETURN VALUE
-char* stripMessage( char* msg)
+/*
+NAME    : stripMessage
+DESC    :
+    strip message takes the first word from a message. it is used to provide a vlaue
+    to compare with >>bye<<, to check if the thread needs to finish executing.
+RTRN    : char*
+PARM    : char*
+*/
+char* stripMessage(char* msg)
 {
     char* ss = NULL;
     ss = subString( msg, getIndexOf(msg, '|', 1), getIndexOf(msg, '|', 2) );

@@ -1,8 +1,10 @@
 /*
-NAME        :
+NAME        : chat-client.h
 PROJECT     : Can We Talk
 AUTHOR      : Ryan Enns
 DESC        :
+    chat-client.h defines macros, objects, and function prototypes for
+    the chat-client.c file.
 */
 
 #ifndef CHAT_CLIENT_H

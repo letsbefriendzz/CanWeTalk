@@ -1,8 +1,10 @@
 /*
-NAME        :
+NAME        : chat-server.h
 PROJECT     : Can We Talk
 AUTHOR      : Ryan Enns
 DESC        :
+    chat-server.h defines macros, objects, and function prototypes
+    relevant to chat-server.c and server.c's execution.
 */
 
 #ifndef CHAT_SERVER_H
