@@ -228,7 +228,6 @@ void* handleClient(void* clientData)
         char* stripped_message = stripMessage(buffer);
         if(strcmp(stripped_message, ">>bye<<") == 0)
         {
-            printf("DETECTED >>bye<<\n");
             run = 1;
         }
         free(stripped_message);
@@ -245,7 +244,7 @@ void* handleClient(void* clientData)
             for(int i = 0; i < ml.activeClients; i++)
             {
                 write(ml.clients[i].ip, message, strlen(message));
-                printf("writing to socket %d :\t%s\n", ml.clients[i].ip, message);
+                // printf("writing to socket %d :\t%s\n", ml.clients[i].ip, message);
             }
         }
     }

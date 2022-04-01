@@ -196,13 +196,17 @@ void* writerThead(void* param)
     sleep(1);
     input_win(p.window, buf);
     replace(buf, '|', ';');
-    if( strlen(buf) < 80 )
+    // strip a newline from the input, if it is present
+    if (buf[strlen (buf) - 1] == '\n')
+      buf[strlen (buf) - 1] = '\0';
+
+    // the following if else clause ranks in what is likely the WORST
+    // code i have written in the last three years
+    // i am way too sick to keep working on this though
+    // covid gang
+    if( strlen(buf) < 40 )
     {
       char message[BUFSIZ];
-
-      // strip a newline from the input, if it is present
-      if (buf[strlen (buf) - 1] == '\n')
-        buf[strlen (buf) - 1] = '\0';
 
       // get time
       time_t s = time(0);
@@ -217,6 +221,29 @@ void* writerThead(void* param)
 
       // done or not, we write to the server
       write (p.socket, message, strlen (message));
+    }
+    else
+    {
+      char buf1[40];
+      char buf2[40];
+
+      time_t s = time(0);
+      struct tm* local = localtime(&s);
+
+      for(int i = 0; i < 40; i++)
+        buf1[i] = buf[i];
+      for(int i = 40; i < 80; i++)
+        buf2[i - 40] = buf[i];
+
+      char msg1[BUFSIZ];
+      char msg2[BUFSIZ];
+
+      sprintf(msg1, "[%-5s] >>|%-40s|(%02d:%02d:%02d)", p.userName, buf1, local->tm_hour, local->tm_min, local->tm_sec);
+      sprintf(msg2, "[%-5s] >>|%-40s|(%02d:%02d:%02d)", p.userName, buf2, local->tm_hour, local->tm_min, local->tm_sec);
+
+      write (p.socket, msg1, strlen (msg1));
+      sleep(1);
+      write (p.socket, msg2, strlen (msg2));
     }
   }
 
