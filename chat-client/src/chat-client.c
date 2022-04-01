@@ -187,11 +187,11 @@ PARM  : void *(threadParmaeters)
 void* writerThead(void* param)
 {
   threadParameters p = *((threadParameters*)param);
-  char buf[MAX_MSG];
+  char buf[80];
   while(exec == 0)
   {
     // reset buffer to nill
-    memset(buf,0,MAX_MSG);
+    memset(buf,0,80);
     // get input from the user
     sleep(1);
     input_win(p.window, buf);
