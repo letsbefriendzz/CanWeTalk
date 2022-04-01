@@ -1,3 +1,10 @@
+/*
+NAME        :
+PROJECT     : Can We Talk
+AUTHOR      : Ryan Enns
+DESC        :
+*/
+
 #ifndef COMMON_H
 #define COMMON_H
 

@@ -1,3 +1,10 @@
+/*
+NAME        :
+PROJECT     : Can We Talk
+AUTHOR      : Ryan Enns
+DESC        :
+*/
+
 #ifndef CHAT_SERVER_H
 #define CHAT_SERVER_H
 #define MAX_CLIENTS 10

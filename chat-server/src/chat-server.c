@@ -1,3 +1,10 @@
+/*
+NAME        :
+PROJECT     : Can We Talk
+AUTHOR      : Ryan Enns
+DESC        :
+*/
+
 #include "../inc/chat-server.h"
 
 #include <stdio.h>
