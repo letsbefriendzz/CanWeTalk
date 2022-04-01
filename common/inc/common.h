@@ -1,8 +1,10 @@
 /*
-NAME        :
+NAME        : common.h
 PROJECT     : Can We Talk
 AUTHOR      : Ryan Enns
 DESC        :
+    common.h defines macros and function prototypes relevant to the execution of both
+    the chat client and chat server programs.
 */
 
 #ifndef COMMON_H
@@ -15,13 +17,6 @@ DESC        :
 #define USER_START  15
 #define MSG_START   26
 #define TIME_START  67
-
-typedef struct message
-{
-    const char* ip;
-    const char* username;
-    const char* message;
-} message;
 
 void helloWorld();
 void logger(const char* user, const char* msg);

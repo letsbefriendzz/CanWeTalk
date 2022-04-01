@@ -157,8 +157,8 @@ int main()
             }
 
             // dump the ml contents for debugging
-            displayMasterList( &ml );
-            printf("THREADS RUNNING:\t%d\n", ml.activeClients);
+            // displayMasterList( &ml );
+            // printf("THREADS RUNNING:\t%d\n", ml.activeClients);
             // LEAVE THE SLEEP CALL
             sleep(1);
         }
@@ -254,9 +254,7 @@ void* handleClient(void* clientData)
 
     // when the loop terminates, remove the current instance from our masterList
     removeFromMasterList( &ml, clientIndex );
-    // decrement the activeClients member of the masterList
-    // return 0; not that we're 10.34.161.56
-    printf("Thread responsible for ML %d DONE\nTHREADS: %d\n", clientIndex, ml.activeClients);
+    // printf("Thread responsible for ML %d DONE\nTHREADS: %d\n", clientIndex, ml.activeClients);
     pthread_exit( (void *) (0) );
 }
 

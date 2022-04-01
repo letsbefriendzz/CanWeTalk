@@ -1,8 +1,9 @@
 /*
-NAME        :
+NAME        : chat-server.c
 PROJECT     : Can We Talk
 AUTHOR      : Ryan Enns
 DESC        :
+    chat-server.c defines various functions relevant to the execution of the server.c chat server application.
 */
 
 #include "../inc/chat-server.h"
@@ -76,6 +77,14 @@ void displayMasterList( volatile masterList* list )
     printf("==============================\n");
 }
 
+/*
+NAME    : countDown
+DESC    :
+    Given an integer, this function calls sleep s many times to count down
+    to zero from the given number
+RTRN    : void
+PARM    : int
+*/
 void countdown(int s)
 {
     printf("COUNTDOWN FROM %d STARTING\n\n", s);
