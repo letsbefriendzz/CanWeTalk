@@ -1,3 +1,10 @@
+/*
+NAME        :
+PROJECT     : Can We Talk
+AUTHOR      : Ryan Enns
+DESC        :
+*/
+
 /* splitWin.c is a simple example to show how to deal with split screens.
    Due to the limited time, this program is not finished yet.
 

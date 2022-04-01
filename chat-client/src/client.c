@@ -1,3 +1,10 @@
+/*
+NAME        :
+PROJECT     : Can We Talk
+AUTHOR      : Ryan Enns
+DESC        :
+*/
+
 #define __REENTRANT
 #include "../inc/chat-client.h"
 #include "../../common/inc/common.h"

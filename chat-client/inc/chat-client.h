@@ -1,3 +1,10 @@
+/*
+NAME        :
+PROJECT     : Can We Talk
+AUTHOR      : Ryan Enns
+DESC        :
+*/
+
 #ifndef CHAT_CLIENT_H
 #define CHAT_CLIENT_H
 
